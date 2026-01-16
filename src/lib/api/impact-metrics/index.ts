@@ -1,0 +1,1 @@
+export { impactMetricsClient } from './client';

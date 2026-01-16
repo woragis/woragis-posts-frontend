@@ -1,0 +1,1 @@
+export { postsClient } from './client';

@@ -1,0 +1,1 @@
+export { technicalWritingsClient } from './client';
