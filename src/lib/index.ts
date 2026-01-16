@@ -25,6 +25,7 @@ export { systemDesignsClient } from './api/system-designs';
 export { impactMetricsClient } from './api/impact-metrics';
 export { aimlIntegrationsClient } from './api/aiml-integrations';
 export { reportsClient } from './api/reports';
+export { publicationsClient } from './api/publications/client';
 
 // Types
 export type {
@@ -42,7 +43,21 @@ export type {
 	Tag,
 	PostAsset,
 	CreatePostRequest,
-	UpdatePostRequest
+	UpdatePostRequest,
+	Publication,
+	PublicationPlatform,
+	PublicationMedia,
+	Platform,
+	CreatePublicationRequest,
+	UpdatePublicationRequest,
+	PublishRequest,
+	BulkPublishRequest,
+	CreatePlatformRequest,
+	PublicationFilter,
+	PublicationStatus,
+	ContentType,
+	PublicationMediaType,
+	PublicationPlatformStatus
 } from './api/types';
 
 // Stores

@@ -155,3 +155,96 @@ export interface PaginationMeta {
 	total: number;
 	totalPages: number;
 }
+
+// ===== Publications Domain =====
+export type PublicationStatus = 'skeleton' | 'draft' | 'scheduled' | 'published' | 'archived';
+export type ContentType = 'post' | 'case_study' | 'problem_solution' | 'technical_writing' | 'system_design' | 'report' | 'impact_metric' | 'aiml_integration';
+export type PublicationMediaType = 'screenshot' | 'archive' | 'thumbnail' | 'attachment' | 'metadata';
+export type PublicationPlatformStatus = 'pending' | 'publishing' | 'published' | 'failed';
+
+export interface Publication {
+	id: string;
+	userId: string;
+	contentId: string;
+	contentType: ContentType;
+	title: string;
+	outline?: string;
+	status: PublicationStatus;
+	isArchived: boolean;
+	platforms?: PublicationPlatform[];
+	media?: PublicationMedia[];
+	createdAt: string;
+	updatedAt: string;
+}
+
+export interface PublicationPlatform {
+	id: string;
+	publicationId: string;
+	platformId: string;
+	publishedAt?: string;
+	publishedUrl?: string;
+	status: PublicationPlatformStatus;
+	metadata?: Record<string, any>;
+	retryCount: number;
+	platform?: Platform;
+}
+
+export interface PublicationMedia {
+	id: string;
+	publicationId: string;
+	platformId: string;
+	mediaType: PublicationMediaType;
+	filePath: string;
+	fileSize: number;
+	uploadedAt: string;
+}
+
+export interface Platform {
+	id: string;
+	name: string;
+	slug: string;
+	description?: string;
+	icon?: string;
+	color?: string;
+	isActive: boolean;
+}
+
+export interface CreatePublicationRequest {
+	contentId: string;
+	contentType: ContentType;
+	title: string;
+	outline?: string;
+}
+
+export interface UpdatePublicationRequest {
+	title?: string;
+	outline?: string;
+	status?: PublicationStatus;
+	isArchived?: boolean;
+}
+
+export interface PublishRequest {
+	metadata?: Record<string, any>;
+	scheduledAt?: string;
+}
+
+export interface BulkPublishRequest {
+	platformIds: string[];
+	metadata?: Record<string, any>;
+}
+
+export interface CreatePlatformRequest {
+	name: string;
+	slug: string;
+	description?: string;
+	icon?: string;
+	color?: string;
+}
+
+export interface PublicationFilter {
+	status?: PublicationStatus;
+	contentType?: ContentType;
+	isArchived?: boolean;
+	limit?: number;
+	offset?: number;
+}
