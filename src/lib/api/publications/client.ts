@@ -1,4 +1,5 @@
 import { BaseApiClient } from '../base-client';
+import { config } from '$lib/config';
 import type {
 	Publication,
 	PublicationPlatform,
@@ -20,7 +21,7 @@ import type { ApiResponse } from '../utils';
  */
 class PublicationsApiClient extends BaseApiClient {
 	constructor() {
-		super(`http://localhost:3013/api/v1/publications`);
+		super(`${config.postsApiUrl}/publications`);
 	}
 
 	// ===== Publications CRUD =====

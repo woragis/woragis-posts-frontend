@@ -1,9 +1,10 @@
 import { BaseApiClient } from '../base-client';
+import { config } from '$lib/config';
 import type { ImpactMetric } from '../types';
 
 class ImpactMetricsApiClient extends BaseApiClient {
 	constructor() {
-		super(`http://localhost:3013/impact-metrics`);
+		super(`${config.postsApiUrl}/impact-metrics`);
 	}
 }
 

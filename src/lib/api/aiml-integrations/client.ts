@@ -1,9 +1,10 @@
 import { BaseApiClient } from '../base-client';
+import { config } from '$lib/config';
 import type { AimlIntegration } from '../types';
 
 class AimlIntegrationsApiClient extends BaseApiClient {
 	constructor() {
-		super(`http://localhost:3013/aiml-integrations`);
+		super(`${config.postsApiUrl}/aiml-integrations`);
 	}
 }
 

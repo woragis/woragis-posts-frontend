@@ -1,9 +1,10 @@
 import { BaseApiClient } from '../base-client';
+import { config } from '$lib/config';
 import type { SystemDesign } from '../types';
 
 class SystemDesignsApiClient extends BaseApiClient {
 	constructor() {
-		super(`http://localhost:3013/system-designs`);
+		super(`${config.postsApiUrl}/system-designs`);
 	}
 }
 

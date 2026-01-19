@@ -156,6 +156,11 @@ export interface PaginationMeta {
 	totalPages: number;
 }
 
+export interface PaginatedApiResponse<T> {
+	data: T[];
+	meta: PaginationMeta;
+}
+
 // ===== Publications Domain =====
 export type PublicationStatus = 'skeleton' | 'draft' | 'scheduled' | 'published' | 'archived';
 export type ContentType =

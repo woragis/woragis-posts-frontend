@@ -1,4 +1,5 @@
 import { BaseApiClient } from '../base-client';
+import { config } from '$lib/config';
 import type { Post, CreatePostRequest, UpdatePostRequest } from '../types';
 
 /**
@@ -6,7 +7,7 @@ import type { Post, CreatePostRequest, UpdatePostRequest } from '../types';
  */
 class PostsApiClient extends BaseApiClient {
 	constructor() {
-		super(`http://localhost:3013/posts`);
+		super(`${config.postsApiUrl}/posts`);
 	}
 
 	async createPost(data: CreatePostRequest): Promise<Post> {

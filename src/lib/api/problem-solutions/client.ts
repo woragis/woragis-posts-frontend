@@ -1,9 +1,10 @@
 import { BaseApiClient } from '../base-client';
+import { config } from '$lib/config';
 import type { ProblemSolution } from '../types';
 
 class ProblemSolutionsApiClient extends BaseApiClient {
 	constructor() {
-		super(`http://localhost:3013/problem-solutions`);
+		super(`${config.postsApiUrl}/problem-solutions`);
 	}
 }
 
