@@ -3,6 +3,7 @@
 The Posts frontend supports 8 different content domains for managing various types of content:
 
 ## Posts
+
 **Primary content format** - Blog posts, articles, and general writing
 
 - Full CRUD operations
@@ -14,6 +15,7 @@ The Posts frontend supports 8 different content domains for managing various typ
 Endpoints: `/posts`
 
 ## Problem Solutions
+
 **Q&A style content** - Solutions to technical problems and challenges
 
 - Structured problem-solution format
@@ -23,6 +25,7 @@ Endpoints: `/posts`
 Endpoints: `/problem-solutions`
 
 ## Case Studies
+
 **Real-world examples** - Detailed case studies of projects and implementations
 
 - Long-form content
@@ -32,6 +35,7 @@ Endpoints: `/problem-solutions`
 Endpoints: `/case-studies`
 
 ## Technical Writings
+
 **Deep dives** - In-depth technical articles and documentation
 
 - Code examples
@@ -41,6 +45,7 @@ Endpoints: `/case-studies`
 Endpoints: `/technical-writings`
 
 ## System Designs
+
 **Architecture documentation** - System architecture and design patterns
 
 - Component diagrams
@@ -50,6 +55,7 @@ Endpoints: `/technical-writings`
 Endpoints: `/system-designs`
 
 ## Reports
+
 **Analysis and summaries** - Regular reports and analysis of metrics/projects
 
 - Data-driven content
@@ -59,6 +65,7 @@ Endpoints: `/system-designs`
 Endpoints: `/reports`
 
 ## Impact Metrics
+
 **Measurements** - Tracking impact and metrics of posts/projects
 
 - Engagement metrics
@@ -68,6 +75,7 @@ Endpoints: `/reports`
 Endpoints: `/impact-metrics`
 
 ## AI/ML Integrations
+
 **AI-powered features** - Content generated or enhanced with AI/ML
 
 - AI-assisted writing
@@ -105,9 +113,11 @@ Endpoints: `/aiml-integrations`
 ## Using the Domains
 
 ### Dashboard
+
 The dashboard (`/dashboard`) provides quick access to all 8 content domains with count cards.
 
 ### List Views
+
 - `/posts` - View all posts
 - `/problem-solutions` - View all problem solutions
 - `/case-studies` - View all case studies
@@ -118,10 +128,11 @@ The dashboard (`/dashboard`) provides quick access to all 8 content domains with
 - `/aiml-integrations` - View all AI/ML integrations
 
 ### API Clients
+
 Each domain has a dedicated API client in `src/lib/api/[domain]/`:
 
 ```typescript
-import { 
+import {
   postsClient,
   problemSolutionsClient,
   caseStudiesClient,
@@ -150,7 +161,7 @@ class PostsApiClient extends BaseApiClient {
   async addSkill(postId: string, skillId: string): Promise<void> {
     await this.client.post(`/${postId}/skills`, { skillId });
   }
-  
+
   async removeTag(postId: string, tagId: string): Promise<void> {
     await this.client.delete(`/${postId}/tags/${tagId}`);
   }
@@ -164,41 +175,49 @@ class PostsApiClient extends BaseApiClient {
 ## Content Strategy
 
 ### Posts
+
 - Daily blog posts
 - News and updates
 - General knowledge sharing
 
 ### Problem Solutions
+
 - Troubleshooting guides
 - FAQ entries
 - Common issues and fixes
 
 ### Case Studies
+
 - Project portfolios
 - Implementation stories
 - Success stories
 
 ### Technical Writings
+
 - Deep-dive articles
 - How-to guides
 - Architecture documentation
 
 ### System Designs
+
 - Architecture diagrams
 - System specifications
 - Technology recommendations
 
 ### Reports
+
 - Monthly reviews
 - Quarterly analysis
 - Annual summaries
 
 ### Impact Metrics
+
 - Tracking blog performance
 - User engagement stats
 - Content effectiveness
 
 ### AI/ML Integrations
+
 - AI-generated summaries
 - Smart tag suggestions
 - Content recommendations

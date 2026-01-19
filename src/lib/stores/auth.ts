@@ -19,7 +19,7 @@ const initialState: AuthState = {
 export const auth = writable(initialState);
 
 export const initializeAuth = async () => {
-	auth.update(state => ({ ...state, isLoading: true }));
+	auth.update((state) => ({ ...state, isLoading: true }));
 
 	try {
 		if (authClient.isAuthenticated()) {
@@ -42,7 +42,7 @@ export const initializeAuth = async () => {
 };
 
 export const loginUser = async (email: string, password: string) => {
-	auth.update(state => ({ ...state, isLoading: true, error: null }));
+	auth.update((state) => ({ ...state, isLoading: true, error: null }));
 
 	try {
 		const response = await authClient.login({ email, password });
@@ -54,7 +54,7 @@ export const loginUser = async (email: string, password: string) => {
 		});
 		return response;
 	} catch (error: any) {
-		auth.update(state => ({
+		auth.update((state) => ({
 			...state,
 			isLoading: false,
 			error: error.message || 'Login failed'
@@ -64,7 +64,7 @@ export const loginUser = async (email: string, password: string) => {
 };
 
 export const registerUser = async (data: any) => {
-	auth.update(state => ({ ...state, isLoading: true, error: null }));
+	auth.update((state) => ({ ...state, isLoading: true, error: null }));
 
 	try {
 		const response = await authClient.register(data);
@@ -76,7 +76,7 @@ export const registerUser = async (data: any) => {
 		});
 		return response;
 	} catch (error: any) {
-		auth.update(state => ({
+		auth.update((state) => ({
 			...state,
 			isLoading: false,
 			error: error.message || 'Registration failed'
@@ -86,13 +86,13 @@ export const registerUser = async (data: any) => {
 };
 
 export const logoutUser = async () => {
-	auth.update(state => ({ ...state, isLoading: true }));
+	auth.update((state) => ({ ...state, isLoading: true }));
 
 	try {
 		await authClient.logout();
 		auth.set(initialState);
 	} catch (error: any) {
-		auth.update(state => ({
+		auth.update((state) => ({
 			...state,
 			isLoading: false,
 			error: error.message || 'Logout failed'
@@ -104,13 +104,13 @@ export const logoutUser = async () => {
 export const updateProfile = async (data: any) => {
 	try {
 		const user = await authClient.updateProfile(data);
-		auth.update(state => ({
+		auth.update((state) => ({
 			...state,
 			user
 		}));
 		return user;
 	} catch (error: any) {
-		auth.update(state => ({
+		auth.update((state) => ({
 			...state,
 			error: error.message || 'Profile update failed'
 		}));
@@ -123,7 +123,7 @@ export const changePassword = async (oldPassword: string, newPassword: string) =
 		await authClient.changePassword({ oldPassword, newPassword });
 		return true;
 	} catch (error: any) {
-		auth.update(state => ({
+		auth.update((state) => ({
 			...state,
 			error: error.message || 'Password change failed'
 		}));

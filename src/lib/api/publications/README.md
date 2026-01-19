@@ -98,6 +98,7 @@ const activeScheduled = await publicationsClient.listPublications({
 ```
 
 **Filter Options:**
+
 - `status?: PublicationStatus` - skeleton | draft | scheduled | published | archived
 - `contentType?: ContentType` - 8 content types supported
 - `isArchived?: boolean` - true/false/undefined (undefined = all)
@@ -132,6 +133,7 @@ const updated = await publicationsClient.updatePublication('pub-123', {
 ```
 
 **Valid State Transitions:**
+
 - skeleton → draft
 - draft → scheduled
 - scheduled → published
@@ -178,6 +180,7 @@ const platforms = await publicationsClient.listPlatforms();
 ```
 
 **Default Platforms:**
+
 1. LinkedIn
 2. Twitter/X
 3. Instagram
@@ -312,6 +315,7 @@ const media = await publicationsClient.uploadMedia(
 ```
 
 **Media Types:**
+
 - `screenshot` - Website/app screenshots
 - `archive` - ZIP or archive files
 - `thumbnail` - Cover images
@@ -348,7 +352,7 @@ try {
 } catch (err: any) {
   const message = err.message;  // "Publication not found"
   const status = err.response?.status;  // 404, 400, 500, etc.
-  
+
   // Common errors:
   // 400 - Invalid request (validation failed)
   // 401 - Unauthorized (invalid token)
@@ -400,35 +404,32 @@ const page3 = await publicationsClient.listPublications({
 
 ```svelte
 <script lang="ts">
-  import { publicationsClient } from '$lib';
-  import type { Publication } from '$lib/api/types';
+	import { publicationsClient } from '$lib';
+	import type { Publication } from '$lib/api/types';
 
-  let publications: Publication[] = [];
-  let loading = true;
+	let publications: Publication[] = [];
+	let loading = true;
 
-  onMount(async () => {
-    try {
-      const { data } = await publicationsClient.listPublications({
-        status: 'draft',
-        limit: 10
-      });
-      publications = data;
-    } catch (err) {
-      console.error('Failed to load:', err.message);
-    } finally {
-      loading = false;
-    }
-  });
+	onMount(async () => {
+		try {
+			const { data } = await publicationsClient.listPublications({
+				status: 'draft',
+				limit: 10
+			});
+			publications = data;
+		} catch (err) {
+			console.error('Failed to load:', err.message);
+		} finally {
+			loading = false;
+		}
+	});
 
-  async function publish(pubId: string) {
-    const platforms = await publicationsClient.listPlatforms();
-    if (platforms.length > 0) {
-      await publicationsClient.publishToplatform(
-        pubId,
-        platforms[0].id
-      );
-    }
-  }
+	async function publish(pubId: string) {
+		const platforms = await publicationsClient.listPlatforms();
+		if (platforms.length > 0) {
+			await publicationsClient.publishToplatform(pubId, platforms[0].id);
+		}
+	}
 </script>
 ```
 

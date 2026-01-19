@@ -3,6 +3,7 @@
 ## Overview
 
 The frontend implements a complete authentication system with:
+
 - User registration and login
 - JWT token-based authentication
 - Automatic token refresh
@@ -61,6 +62,7 @@ tokenCookies.clearTokens();
 ```
 
 Features:
+
 - Uses `document.cookie` API
 - Secure HttpOnly cookies (server-side)
 - Automatic expiration handling
@@ -110,11 +112,11 @@ All authenticated routes check `$auth.isAuthenticated` in `onMount`:
 
 ```svelte
 <script lang="ts">
-  onMount(async () => {
-    if (!$auth.isAuthenticated) {
-      await goto('/auth/login');
-    }
-  });
+	onMount(async () => {
+		if (!$auth.isAuthenticated) {
+			await goto('/auth/login');
+		}
+	});
 </script>
 ```
 

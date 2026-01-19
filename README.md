@@ -83,6 +83,7 @@ npm run test:e2e     # E2E tests only
 ## API Integration
 
 The frontend connects to:
+
 - **Posts Service** (port 3013) - Main content management API
 - **Auth Service** (port 3010) - User authentication
 
@@ -102,6 +103,7 @@ All requests are automatically authenticated with JWT tokens stored in secure co
 ## Authentication
 
 The application includes a complete authentication system:
+
 - User registration and login
 - JWT token-based authentication
 - Automatic token refresh

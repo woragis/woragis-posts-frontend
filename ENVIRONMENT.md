@@ -20,11 +20,14 @@ PUBLIC_AUTH_API_URL=http://localhost:3010
 ## Configuration Files
 
 ### .env
+
 Stores environment-specific variables:
+
 - API base URLs
 - Can be overridden by system environment variables
 
 ### src/lib/config.ts
+
 Runtime configuration that reads from .env and exposes typed constants.
 
 ## Development

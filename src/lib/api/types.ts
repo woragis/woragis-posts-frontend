@@ -158,8 +158,21 @@ export interface PaginationMeta {
 
 // ===== Publications Domain =====
 export type PublicationStatus = 'skeleton' | 'draft' | 'scheduled' | 'published' | 'archived';
-export type ContentType = 'post' | 'case_study' | 'problem_solution' | 'technical_writing' | 'system_design' | 'report' | 'impact_metric' | 'aiml_integration';
-export type PublicationMediaType = 'screenshot' | 'archive' | 'thumbnail' | 'attachment' | 'metadata';
+export type ContentType =
+	| 'post'
+	| 'case_study'
+	| 'problem_solution'
+	| 'technical_writing'
+	| 'system_design'
+	| 'report'
+	| 'impact_metric'
+	| 'aiml_integration';
+export type PublicationMediaType =
+	| 'screenshot'
+	| 'archive'
+	| 'thumbnail'
+	| 'attachment'
+	| 'metadata';
 export type PublicationPlatformStatus = 'pending' | 'publishing' | 'published' | 'failed';
 
 export interface Publication {

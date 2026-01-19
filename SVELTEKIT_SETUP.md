@@ -69,6 +69,7 @@ npm run test         # Run all tests
 ## Adapter
 
 Uses `@sveltejs/adapter-auto` which automatically detects the best deployment target:
+
 - Node.js
 - Vercel
 - Cloudflare
@@ -79,6 +80,7 @@ Uses `@sveltejs/adapter-auto` which automatically detects the best deployment ta
 ## Alias
 
 The `$lib` alias resolves to `src/lib`:
+
 ```typescript
 import { auth } from '$lib';  // src/lib/index.ts
 import { postsClient } from '$lib/api/posts';

@@ -5,6 +5,7 @@ Complete SvelteKit frontend for the Publications domain with multi-platform publ
 ## Overview
 
 The Publications frontend provides:
+
 - **Publication management** - Create, read, update, delete publications
 - **Multi-platform publishing** - Publish content to multiple platforms simultaneously
 - **Publishing workflow** - State machine UI for skeleton → draft → scheduled → published → archived
@@ -46,6 +47,7 @@ src/
 TypeScript client extending `BaseApiClient` with typed methods:
 
 #### Publications CRUD
+
 ```typescript
 // Create publication
 const pub = await publicationsClient.createPublication({
@@ -80,6 +82,7 @@ await publicationsClient.deletePublication(pubId);
 ```
 
 #### Publishing Operations
+
 ```typescript
 // List available platforms
 const platforms = await publicationsClient.listPlatforms();
@@ -108,6 +111,7 @@ const retried = await publicationsClient.retryPublish(publicationId, platformId)
 ```
 
 #### Media Management
+
 ```typescript
 // Upload media
 const media = await publicationsClient.uploadMedia(
@@ -131,6 +135,7 @@ await publicationsClient.deleteMedia(publicationId, mediaId);
 Displays all user publications with advanced filtering.
 
 **Features:**
+
 - Paginated list (20 items per page)
 - Filter by status (skeleton, draft, scheduled, published, archived)
 - Filter by content type (8 types supported)
@@ -141,6 +146,7 @@ Displays all user publications with advanced filtering.
 **URL Route:** `/publications`
 
 **Components Used:**
+
 - Status badge with color coding
 - Content type indicator
 - Publication count
@@ -152,12 +158,14 @@ Displays all user publications with advanced filtering.
 Simple form to create new publication.
 
 **Form Fields:**
-- `title` * - Publication title (required)
-- `contentId` * - ID of source content (required)
-- `contentType` * - Type of content (required, 8 options)
+
+- `title` \* - Publication title (required)
+- `contentId` \* - ID of source content (required)
+- `contentType` \* - Type of content (required, 8 options)
 - `outline` - Brief summary (optional)
 
 **Flow:**
+
 1. User fills form
 2. On submit, calls `createPublication()`
 3. Backend returns publication with `skeleton` status
@@ -172,6 +180,7 @@ Main publication view with publishing capabilities.
 **Two-Column Layout:**
 
 **Left Column (Main):**
+
 - Publication metadata (title, outline, type, status)
 - Created/updated dates
 - Edit button
@@ -185,11 +194,13 @@ Main publication view with publishing capabilities.
   - Unpublish button
 
 **Right Column (Sidebar):**
+
 - "Publish to Platforms" card
 - List of unpublished, active platforms
 - Click to open publish modal
 
 **Modals:**
+
 - Publish confirmation modal
   - Shows publication title
   - Shows target platform
@@ -198,6 +209,7 @@ Main publication view with publishing capabilities.
 **URL Route:** `/publications/[id]`
 
 **State Management:**
+
 - `publication` - Current publication data
 - `platforms` - All available platforms
 - `publishedPlatforms` - Platforms this publication is published to
@@ -209,12 +221,14 @@ Main publication view with publishing capabilities.
 Edit publication metadata and state.
 
 **Form Fields:**
-- `title` * - Publication title (required)
+
+- `title` \* - Publication title (required)
 - `outline` - Publication outline (optional)
 - `status` - Current status with state machine info
 - `isArchived` - Checkbox to archive
 
 **Features:**
+
 - State transition guidance (skeleton → draft → scheduled → published → archived)
 - Archive toggle
 - Delete button with confirmation
@@ -245,7 +259,7 @@ interface Publication {
 
 // Status and content type unions
 type PublicationStatus = 'skeleton' | 'draft' | 'scheduled' | 'published' | 'archived';
-type ContentType = 'post' | 'case_study' | 'problem_solution' | 'technical_writing' | 
+type ContentType = 'post' | 'case_study' | 'problem_solution' | 'technical_writing' |
                    'system_design' | 'report' | 'impact_metric' | 'aiml_integration';
 type PublicationMediaType = 'screenshot' | 'archive' | 'thumbnail' | 'attachment' | 'metadata';
 type PublicationPlatformStatus = 'pending' | 'publishing' | 'published' | 'failed';
@@ -298,6 +312,7 @@ if (token) {
 ## Styling
 
 Pages use:
+
 - **Tailwind CSS** for utility styling
 - **Color scheme:**
   - Status badges: skeleton (gray), draft (yellow), scheduled (blue), published (green), failed (red)
@@ -372,18 +387,18 @@ describe('Publications List', () => {
 
 ## Endpoint Mapping
 
-| Feature | Method | Endpoint |
-|---------|--------|----------|
-| List | GET | `/publications?limit=20&offset=0&status=draft` |
-| Create | POST | `/publications` |
-| Get | GET | `/publications/{id}` |
-| Update | PUT | `/publications/{id}` |
-| Delete | DELETE | `/publications/{id}` |
-| Platforms | GET | `/publications/platforms` |
-| Publish | POST | `/publications/{id}/publish/{platformId}` |
-| Unpublish | DELETE | `/publications/{id}/publish/{platformId}` |
-| List Platforms | GET | `/publications/{id}/publish` |
-| Retry | POST | `/publications/{id}/publish/{platformId}/retry` |
-| Bulk Publish | POST | `/publications/{id}/publish/bulk` |
-| Upload Media | POST | `/publications/{id}/media` |
-| List Media | GET | `/publications/{id}/media` |
+| Feature        | Method | Endpoint                                        |
+| -------------- | ------ | ----------------------------------------------- |
+| List           | GET    | `/publications?limit=20&offset=0&status=draft`  |
+| Create         | POST   | `/publications`                                 |
+| Get            | GET    | `/publications/{id}`                            |
+| Update         | PUT    | `/publications/{id}`                            |
+| Delete         | DELETE | `/publications/{id}`                            |
+| Platforms      | GET    | `/publications/platforms`                       |
+| Publish        | POST   | `/publications/{id}/publish/{platformId}`       |
+| Unpublish      | DELETE | `/publications/{id}/publish/{platformId}`       |
+| List Platforms | GET    | `/publications/{id}/publish`                    |
+| Retry          | POST   | `/publications/{id}/publish/{platformId}/retry` |
+| Bulk Publish   | POST   | `/publications/{id}/publish/bulk`               |
+| Upload Media   | POST   | `/publications/{id}/media`                      |
+| List Media     | GET    | `/publications/{id}/media`                      |

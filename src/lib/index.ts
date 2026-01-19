@@ -61,4 +61,12 @@ export type {
 } from './api/types';
 
 // Stores
-export { auth, initializeAuth, loginUser, registerUser, logoutUser, updateProfile, changePassword } from './stores/auth';
+export {
+	auth,
+	initializeAuth,
+	loginUser,
+	registerUser,
+	logoutUser,
+	updateProfile,
+	changePassword
+} from './stores/auth';

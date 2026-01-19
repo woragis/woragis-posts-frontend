@@ -102,7 +102,10 @@ class PublicationsApiClient extends BaseApiClient {
 		return response.data.data!;
 	}
 
-	async bulkPublish(publicationId: string, data: BulkPublishRequest): Promise<PublicationPlatform[]> {
+	async bulkPublish(
+		publicationId: string,
+		data: BulkPublishRequest
+	): Promise<PublicationPlatform[]> {
 		const response = await this.client.post<ApiResponse<PublicationPlatform[]>>(
 			`/${publicationId}/publish/bulk`,
 			data

@@ -5,7 +5,9 @@
 The frontend uses a modular API client architecture with the following layers:
 
 ### 1. Base Client (`BaseApiClient`)
+
 Abstract class providing standard CRUD operations:
+
 - `create<T>(data)` - POST /
 - `list<T>(page, limit)` - GET / with pagination
 - `getById<T>(id)` - GET /{id}
@@ -13,6 +15,7 @@ Abstract class providing standard CRUD operations:
 - `delete(id)` - DELETE /{id}
 
 ### 2. Domain Clients
+
 Specialized clients extending `BaseApiClient`:
 
 ```typescript
@@ -28,6 +31,7 @@ class PostsApiClient extends BaseApiClient {
 ```
 
 Clients for each domain:
+
 - `PostsApiClient` → posts/
 - `ProblemSolutionsApiClient` → problem-solutions/
 - `CaseStudiesApiClient` → case-studies/
@@ -110,6 +114,7 @@ try {
 ## Usage Examples
 
 ### List Posts
+
 ```typescript
 const response = await postsClient.listPosts(page, limit);
 const posts: Post[] = response.data;
@@ -117,6 +122,7 @@ const totalPages = Math.ceil(response.meta.total / limit);
 ```
 
 ### Get Single Post
+
 ```typescript
 const post = await postsClient.getPost(postId);
 // or by slug
@@ -124,6 +130,7 @@ const post = await postsClient.getPostBySlug('my-post-slug');
 ```
 
 ### Create Post
+
 ```typescript
 const newPost = await postsClient.createPost({
   title: 'New Post',
@@ -134,6 +141,7 @@ const newPost = await postsClient.createPost({
 ```
 
 ### Update Post
+
 ```typescript
 const updated = await postsClient.updatePost(postId, {
   title: 'Updated Title',
@@ -142,6 +150,7 @@ const updated = await postsClient.updatePost(postId, {
 ```
 
 ### Delete Post
+
 ```typescript
 await postsClient.deletePost(postId);
 ```
@@ -151,6 +160,7 @@ await postsClient.deletePost(postId);
 To add support for a new domain:
 
 1. Create `src/lib/api/[domain]/client.ts`:
+
 ```typescript
 import { BaseApiClient } from '../base-client';
 
@@ -165,11 +175,13 @@ export const domainClient = new DomainApiClient();
 ```
 
 2. Create `src/lib/api/[domain]/index.ts`:
+
 ```typescript
 export { domainClient } from './client';
 ```
 
 3. Export from `src/lib/index.ts`:
+
 ```typescript
 export { domainClient } from './api/[domain]';
 ```
