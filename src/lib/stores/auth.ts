@@ -23,13 +23,23 @@ export const initializeAuth = async () => {
 
 	try {
 		if (authClient.isAuthenticated()) {
-			const user = await authClient.getCurrentUser();
-			auth.set({
-				user,
-				isAuthenticated: true,
-				isLoading: false,
-				error: null
-			});
+			try {
+				const user = await authClient.getCurrentUser();
+				auth.set({
+					user,
+					isAuthenticated: true,
+					isLoading: false,
+					error: null
+				});
+			} catch (err: any) {
+				// If /me endpoint is unavailable, keep session authenticated
+				auth.set({
+					user: null,
+					isAuthenticated: true,
+					isLoading: false,
+					error: null
+				});
+			}
 		} else {
 			auth.set(initialState);
 		}
