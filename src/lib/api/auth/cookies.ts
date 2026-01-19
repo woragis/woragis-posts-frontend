@@ -1,56 +1,58 @@
+import { browser } from '$app/environment';
+
 /**
  * Token Cookie Manager
- * Handles storing and retrieving JWT tokens from browser cookies
+ * Aligns with jobs/management: browser-guarded, Lax cookies, Secure only on https.
  */
 
+const ACCESS_TOKEN_KEY = 'access_token';
+const REFRESH_TOKEN_KEY = 'refresh_token';
+
+function setCookie(name: string, value: string, maxAgeSeconds: number, secure: boolean) {
+	if (!browser) return;
+	const expires = new Date();
+	expires.setSeconds(expires.getSeconds() + maxAgeSeconds);
+	const secureFlag = secure ? '; Secure' : '';
+	document.cookie = `${name}=${encodeURIComponent(value)}; path=/; expires=${expires.toUTCString()}; SameSite=Lax${secureFlag}`;
+}
+
+function getCookie(name: string): string | null {
+	if (!browser) return null;
+	const match = document.cookie.match(new RegExp(`${name}=([^;]*)`));
+	return match ? decodeURIComponent(match[1]) : null;
+}
+
+function clearCookie(name: string) {
+	if (!browser) return;
+	document.cookie = `${name}=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC; SameSite=Lax`;
+}
+
 const tokenCookies = {
-	/**
-	 * Get access token from cookies
-	 */
 	getAccessToken(): string | null {
-		if (typeof document === 'undefined') return null;
-		const match = document.cookie.match(/accessToken=([^;]*)/);
-		return match ? decodeURIComponent(match[1]) : null;
+		return getCookie(ACCESS_TOKEN_KEY);
 	},
 
-	/**
-	 * Set access token in cookies
-	 */
-	setAccessToken(token: string, expiresIn?: number): void {
-		if (typeof document === 'undefined') return;
-		const expires = new Date();
-		expires.setSeconds(expires.getSeconds() + (expiresIn || 3600));
-		document.cookie = `accessToken=${encodeURIComponent(token)}; path=/; expires=${expires.toUTCString()}; Secure; SameSite=Strict`;
+	setAccessToken(token: string, expiresInSeconds = 3600): void {
+		const secure = browser && typeof location !== 'undefined' && location.protocol === 'https:';
+		setCookie(ACCESS_TOKEN_KEY, token, expiresInSeconds, secure);
 	},
 
-	/**
-	 * Get refresh token from cookies
-	 */
 	getRefreshToken(): string | null {
-		if (typeof document === 'undefined') return null;
-		const match = document.cookie.match(/refreshToken=([^;]*)/);
-		return match ? decodeURIComponent(match[1]) : null;
+		return getCookie(REFRESH_TOKEN_KEY);
 	},
 
-	/**
-	 * Set refresh token in cookies
-	 */
-	setRefreshToken(token: string, expiresIn?: number): void {
-		if (typeof document === 'undefined') return;
-		const expires = new Date();
-		expires.setSeconds(expires.getSeconds() + (expiresIn || 604800)); // 7 days
-		document.cookie = `refreshToken=${encodeURIComponent(token)}; path=/; expires=${expires.toUTCString()}; Secure; SameSite=Strict`;
+	setRefreshToken(token: string, expiresInSeconds = 604800): void {
+		const secure = browser && typeof location !== 'undefined' && location.protocol === 'https:';
+		setCookie(REFRESH_TOKEN_KEY, token, expiresInSeconds, secure);
 	},
 
-	/**
-	 * Clear all tokens from cookies
-	 */
 	clearTokens(): void {
-		if (typeof document === 'undefined') return;
-		document.cookie =
-			'accessToken=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC; Secure; SameSite=Strict';
-		document.cookie =
-			'refreshToken=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC; Secure; SameSite=Strict';
+		clearCookie(ACCESS_TOKEN_KEY);
+		clearCookie(REFRESH_TOKEN_KEY);
+	},
+
+	isAuthenticated(): boolean {
+		return !!this.getAccessToken();
 	}
 };
 
