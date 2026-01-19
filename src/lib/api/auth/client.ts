@@ -11,6 +11,30 @@ import type {
 	ApiResponse
 } from './types';
 
+function normalizeAuthResponse(raw: any): AuthResponse {
+	// Support snake_case responses from backend
+	const accessToken = raw?.accessToken || raw?.access_token;
+	const refreshToken = raw?.refreshToken || raw?.refresh_token;
+	const expiresAt = raw?.expires_at;
+	const expiresIn = raw?.expiresIn || raw?.expires_in;
+
+	// Compute TTL in seconds if expires_at (epoch seconds) is provided
+	let ttlSeconds: number | undefined;
+	if (expiresIn && typeof expiresIn === 'number') {
+		ttlSeconds = expiresIn;
+	} else if (expiresAt && typeof expiresAt === 'number') {
+		const now = Math.floor(Date.now() / 1000);
+		ttlSeconds = Math.max(60, expiresAt - now);
+	}
+
+	return {
+		accessToken,
+		refreshToken,
+		expiresIn: ttlSeconds,
+		user: raw?.user
+	};
+}
+
 /**
  * Auth API Client
  * Handles authentication and user management
@@ -78,10 +102,12 @@ class AuthApiClient {
 
 	async login(data: LoginRequest): Promise<AuthResponse> {
 		const response = await this.client.post<ApiResponse<AuthResponse>>('/login', data);
-		const authData = response.data.data!;
+		const authData = normalizeAuthResponse(response.data.data);
 
 		// Store tokens
-		tokenCookies.setAccessToken(authData.accessToken, authData.expiresIn);
+		if (authData.accessToken) {
+			tokenCookies.setAccessToken(authData.accessToken, authData.expiresIn);
+		}
 		if (authData.refreshToken) {
 			tokenCookies.setRefreshToken(authData.refreshToken);
 		}
@@ -91,10 +117,12 @@ class AuthApiClient {
 
 	async register(data: RegisterRequest): Promise<AuthResponse> {
 		const response = await this.client.post<ApiResponse<AuthResponse>>('/register', data);
-		const authData = response.data.data!;
+		const authData = normalizeAuthResponse(response.data.data);
 
 		// Store tokens
-		tokenCookies.setAccessToken(authData.accessToken, authData.expiresIn);
+		if (authData.accessToken) {
+			tokenCookies.setAccessToken(authData.accessToken, authData.expiresIn);
+		}
 		if (authData.refreshToken) {
 			tokenCookies.setRefreshToken(authData.refreshToken);
 		}
@@ -130,8 +158,17 @@ class AuthApiClient {
 			refreshToken
 		});
 
-		const authData = response.data.data!;
-		tokenCookies.setAccessToken(authData.accessToken, authData.expiresIn);
+		const authData = normalizeAuthResponse(response.data.data);
+		if (authData.accessToken) {
+			tokenCookies.setAccessToken(authData.accessToken, authData.expiresIn);
+		}
+		if (authData.refreshToken) {
+			tokenCookies.setRefreshToken(authData.refreshToken);
+		}
+
+		if (!authData.accessToken) {
+			throw new Error('Refresh did not return access token');
+		}
 
 		return authData.accessToken;
 	}
