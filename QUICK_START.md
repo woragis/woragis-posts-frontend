@@ -187,7 +187,7 @@ This frontend includes an AI-powered draft builder that helps you create article
 All posts are written in Markdown and rendered beautifully:
 
 - **Bold**: `**text**`
-- *Italic*: `*text*`
+- _Italic_: `*text*`
 - `Code`: `` `code` ``
 - Code blocks: ` ``` ` ... ` ``` `
 - Headings: `# Heading 1`, `## Heading 2`, etc.

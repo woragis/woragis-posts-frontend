@@ -123,14 +123,15 @@
 
 		{#if isLoading}
 			<div class="text-center py-8">
-				<div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" />
+				<div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
 			</div>
 		{:else}
 			<form on:submit|preventDefault={handleSubmit}>
 				<!-- Title -->
 				<div class="mb-4">
-					<label class="block text-sm font-medium text-gray-700 mb-2">Title *</label>
+					<label for="edit-title" class="block text-sm font-medium text-gray-700 mb-2">Title *</label>
 					<input
+						id="edit-title"
 						type="text"
 						bind:value={title}
 						placeholder="Publication title"
@@ -140,19 +141,21 @@
 
 				<!-- Outline -->
 				<div class="mb-4">
-					<label class="block text-sm font-medium text-gray-700 mb-2">Outline</label>
+					<label for="edit-outline" class="block text-sm font-medium text-gray-700 mb-2">Outline</label>
 					<textarea
+						id="edit-outline"
 						bind:value={outline}
 						placeholder="Brief outline or summary"
 						rows="4"
 						class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-					/>
+					></textarea>
 				</div>
 
 				<!-- Status -->
 				<div class="mb-4">
-					<label class="block text-sm font-medium text-gray-700 mb-2">Status</label>
-					<select
+				<label for="status" class="block text-sm font-medium text-gray-700 mb-2">Status</label>
+				<select
+					id="status"
 						bind:value={status}
 						class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
 					>

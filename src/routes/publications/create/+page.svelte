@@ -85,8 +85,9 @@
 		<form on:submit|preventDefault={handleSubmit}>
 			<!-- Title -->
 			<div class="mb-4">
-				<label class="block text-sm font-medium text-gray-700 mb-2">Title *</label>
+				<label for="create-title" class="block text-sm font-medium text-gray-700 mb-2">Title *</label>
 				<input
+					id="create-title"
 					type="text"
 					bind:value={title}
 					placeholder="Publication title"
@@ -97,19 +98,21 @@
 
 			<!-- Outline -->
 			<div class="mb-4">
-				<label class="block text-sm font-medium text-gray-700 mb-2">Outline</label>
+				<label for="create-outline" class="block text-sm font-medium text-gray-700 mb-2">Outline</label>
 				<textarea
+					id="create-outline"
 					bind:value={outline}
 					placeholder="Brief outline or summary"
 					rows="4"
 					class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-				/>
+				></textarea>
 			</div>
 
 			<!-- Content ID -->
 			<div class="mb-4">
-				<label class="block text-sm font-medium text-gray-700 mb-2">Content ID *</label>
+				<label for="create-content-id" class="block text-sm font-medium text-gray-700 mb-2">Content ID *</label>
 				<input
+					id="create-content-id"
 					type="text"
 					bind:value={contentId}
 					placeholder="ID of the content being published"
@@ -123,8 +126,9 @@
 
 			<!-- Content Type -->
 			<div class="mb-6">
-				<label class="block text-sm font-medium text-gray-700 mb-2">Content Type *</label>
-				<select
+			<label for="content-type" class="block text-sm font-medium text-gray-700 mb-2">Content Type *</label>
+			<select
+				id="content-type"
 					bind:value={contentType}
 					class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
 					required

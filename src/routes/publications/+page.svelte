@@ -118,8 +118,9 @@
 	<div class="bg-white rounded-lg shadow p-4 mb-6">
 		<div class="grid grid-cols-1 md:grid-cols-4 gap-4">
 			<div>
-				<label class="block text-sm font-medium mb-2">Status</label>
+				<label for="status-filter" class="block text-sm font-medium mb-2">Status</label>
 				<select
+					id="status-filter"
 					bind:value={statusFilter}
 					on:change={handleStatusChange}
 					class="w-full px-3 py-2 border border-gray-300 rounded-md"
@@ -134,8 +135,9 @@
 			</div>
 
 			<div>
-				<label class="block text-sm font-medium mb-2">Content Type</label>
+				<label for="content-type-filter" class="block text-sm font-medium mb-2">Content Type</label>
 				<select
+					id="content-type-filter"
 					bind:value={contentTypeFilter}
 					on:change={handleStatusChange}
 					class="w-full px-3 py-2 border border-gray-300 rounded-md"
@@ -153,8 +155,9 @@
 			</div>
 
 			<div>
-				<label class="block text-sm font-medium mb-2">Archive Status</label>
+				<label for="archive-filter" class="block text-sm font-medium mb-2">Archive Status</label>
 				<select
+					id="archive-filter"
 					bind:value={archivedFilter}
 					on:change={handleStatusChange}
 					class="w-full px-3 py-2 border border-gray-300 rounded-md"
@@ -179,7 +182,7 @@
 	<!-- Publications List -->
 	{#if isLoading}
 		<div class="text-center py-8">
-			<div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" />
+			<div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
 		</div>
 	{:else if publications.length === 0}
 		<div class="text-center py-8 bg-white rounded-lg">
@@ -188,8 +191,9 @@
 	{:else}
 		<div class="space-y-4">
 			{#each publications as pub (pub.id)}
-				<div
-					class="bg-white rounded-lg shadow hover:shadow-lg transition-shadow cursor-pointer p-4"
+				<button
+					type="button"
+					class="w-full text-left bg-white rounded-lg shadow hover:shadow-lg transition-shadow cursor-pointer p-4"
 					on:click={() => openPublication(pub.id)}
 				>
 					<div class="flex justify-between items-start">
@@ -221,7 +225,7 @@
 							{/if}
 						</div>
 					</div>
-				</div>
+				</button>
 			{/each}
 		</div>
 

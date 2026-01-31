@@ -147,7 +147,7 @@
 
 	{#if isLoading}
 		<div class="text-center py-8">
-			<div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" />
+			<div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
 		</div>
 	{:else if publication}
 		<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -157,11 +157,11 @@
 				<div class="bg-white rounded-lg shadow p-6 mb-6">
 					<div class="flex justify-between items-start mb-4">
 						<div>
-							<h1 class="text-3xl font-bold">{publication.title}</h1>
-							<p class="text-gray-600 mt-2">{publication.outline || 'No outline provided'}</p>
+							<h1 class="text-3xl font-bold">{publication?.title}</h1>
+							<p class="text-gray-600 mt-2">{publication?.outline || 'No outline provided'}</p>
 						</div>
 						<button
-							on:click={() => goto(`/publications/${publication.id}`)}
+							on:click={() => goto(`/publications/${publication?.id}`)}
 							class="text-blue-600 hover:text-blue-800 font-medium"
 						>
 							Edit
