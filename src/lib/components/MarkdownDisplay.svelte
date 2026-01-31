@@ -6,9 +6,14 @@
 	let htmlContent = '';
 
 	$: {
-		marked.parse(markdown).then((html) => {
-			htmlContent = html;
-		});
+		const result = marked.parse(markdown);
+		if (typeof result === 'string') {
+			htmlContent = result;
+		} else {
+			result.then((html: string) => {
+				htmlContent = html;
+			});
+		}
 	}
 </script>
 

@@ -92,7 +92,7 @@
 					disabled={isLoading}
 					class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100"
 					rows="5"
-				/>
+				></textarea>
 				<p class="text-xs text-gray-500 mt-1">
 					Example: "Write a beginner's guide to Go microservices. Cover basic concepts, best practices, and common pitfalls. Tone: friendly but professional."
 				</p>
@@ -145,13 +145,15 @@
 
 		<!-- Streaming Display -->
 		<div class="mt-6">
-			<label class="block text-sm font-medium text-gray-700 mb-2">Generated Content</label>
-			<StreamingTextDisplay
-				{isLoading}
-				{streamContent}
-				{error}
-				onCancel={isLoading ? cancelGeneration : null}
-			/>
+			<label for="generated-content" class="block text-sm font-medium text-gray-700 mb-2">Generated Content</label>
+			<div id="generated-content">
+				<StreamingTextDisplay
+					{isLoading}
+					{streamContent}
+					{error}
+					onCancel={isLoading ? cancelGeneration : null}
+				/>
+			</div>
 		</div>
 
 		<!-- Action Buttons -->

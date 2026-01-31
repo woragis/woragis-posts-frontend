@@ -15,7 +15,7 @@
 	let title = '';
 	let content = '';
 	let excerpt = '';
-	let slug = '';
+	let postSlug = '';
 	let status: 'draft' | 'published' = 'draft';
 
 	// AI improvement state
@@ -39,7 +39,7 @@
 			title = post.title;
 			content = post.content;
 			excerpt = post.excerpt || '';
-			slug = post.slug;
+			postSlug = post.slug;
 			status = post.status;
 		} catch (err) {
 			error = err instanceof Error ? err.message : 'Failed to load post';
@@ -138,7 +138,7 @@
 				title: title.trim(),
 				content: content.trim(),
 				excerpt: excerpt.trim(),
-				slug,
+				slug: postSlug,
 				status
 			});
 
@@ -212,7 +212,7 @@
 						<input
 							id="slug"
 							type="text"
-							bind:value={slug}
+							bind:value={postSlug}
 							class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
 						/>
 					</div>
@@ -227,7 +227,7 @@
 							bind:value={excerpt}
 							rows="2"
 							class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-						/>
+						></textarea>
 					</div>
 
 					<!-- Status -->
@@ -278,18 +278,20 @@
 										disabled={isImproving}
 										rows="3"
 										class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100"
-									/>
+									></textarea>
 								</div>
 
 								<!-- Streaming Display -->
 								<div>
-									<label class="block text-sm font-medium text-gray-700 mb-2">Improved Content</label>
-									<StreamingTextDisplay
-										isLoading={isImproving}
-										streamContent={improveStreamContent}
-										error={improveError}
-										onCancel={isImproving ? cancelImprovement : null}
-									/>
+									<label for="improved-content" class="block text-sm font-medium text-gray-700 mb-2">Improved Content</label>
+									<div id="improved-content">
+										<StreamingTextDisplay
+											isLoading={isImproving}
+											streamContent={improveStreamContent}
+											error={improveError}
+											onCancel={isImproving ? cancelImprovement : null}
+										/>
+									</div>
 								</div>
 
 								<!-- Action Buttons -->

@@ -7,15 +7,18 @@
 	export let showPreview = true;
 
 	let previewHtml = '';
-
-	// Update preview whenever markdown changes
-	$: {
-		marked.parse(markdown).then((html) => {
-			previewHtml = html;
-		});
-	}
-
 	let activeTab: 'edit' | 'preview' = 'edit';
+
+	$: {
+		const result = marked.parse(markdown);
+		if (typeof result === 'string') {
+			previewHtml = result;
+		} else {
+			result.then((html: string) => {
+				previewHtml = html;
+			});
+		}
+	}
 </script>
 
 <div class="border border-gray-300 rounded-lg overflow-hidden bg-white">
@@ -52,7 +55,7 @@
 				bind:value={markdown}
 				{placeholder}
 				class="w-full h-full px-4 py-3 font-mono text-sm border-0 focus:ring-0 resize-none"
-			/>
+			></textarea>
 		{:else}
 			<div
 				class="w-full h-full overflow-auto p-4 prose prose-sm max-w-none prose-headings:font-semibold prose-headings:text-gray-900 prose-p:text-gray-700 prose-a:text-blue-600 prose-strong:font-semibold prose-code:bg-gray-100 prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-code:text-red-600 prose-pre:bg-gray-100 prose-pre:border prose-pre:border-gray-200"

@@ -1,6 +1,12 @@
 import { config } from '$lib/config';
 
-export type Agent = 'economist' | 'strategist' | 'entrepreneur' | 'startup' | 'cover_letter' | 'auto';
+export type Agent =
+	| 'economist'
+	| 'strategist'
+	| 'entrepreneur'
+	| 'startup'
+	| 'cover_letter'
+	| 'auto';
 export type Provider = 'openai' | 'anthropic' | 'xai' | 'manus' | 'cipher';
 
 export interface ChatRequest {
