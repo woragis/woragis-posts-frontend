@@ -13,11 +13,20 @@ const getAuthApiUrl = (): string => {
 	return `${cleanUrl}/api/v1`;
 };
 
+const getAiServiceUrl = (): string => {
+	const baseUrl = env.PUBLIC_AI_SERVICE_URL || 'http://localhost:8000';
+	const cleanUrl = baseUrl.replace(/\/$/, '');
+	return cleanUrl;
+};
+
 export const config = {
 	get postsApiUrl() {
 		return getPostsApiUrl();
 	},
 	get authApiUrl() {
 		return getAuthApiUrl();
+	},
+	get aiServiceUrl() {
+		return getAiServiceUrl();
 	}
 };
