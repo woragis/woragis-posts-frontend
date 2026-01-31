@@ -151,6 +151,69 @@ Edit `src/lib/stores/auth.ts` or `src/lib/api/auth/client.ts`
 - Global styles in `src/routes/layout.css`
 - Component-scoped styles in `<style>` blocks
 
+## AI-Assisted Draft Builder
+
+This frontend includes an AI-powered draft builder that helps you create articles quickly!
+
+### Creating Posts with AI
+
+1. Navigate to **Posts > New Post**
+2. Select the **"AI Draft Builder"** tab
+3. Provide article context:
+   - Topic and key points
+   - Target audience
+   - Tone (professional, friendly, etc.)
+4. Choose an agent type or use "auto"
+5. Adjust creativity with the temperature slider
+6. Click **"Generate Draft"**
+7. Wait for AI to stream the draft
+8. Click **"Use This Draft"** to move to the editor
+
+### Editing & Improving Posts
+
+1. Navigate to **Posts > [Draft]** to edit an existing draft
+2. Use the **"Show AI Improve"** button to access improvements
+3. Describe what you want to improve:
+   - "Make it more technical"
+   - "Add examples and case studies"
+   - "Simplify for beginners"
+   - "Add statistics and data"
+4. Click **"Improve with AI"**
+5. Preview the improved content
+6. Click **"Accept Changes"** to apply or regenerate
+
+### Writing in Markdown
+
+All posts are written in Markdown and rendered beautifully:
+
+- **Bold**: `**text**`
+- *Italic*: `*text*`
+- `Code`: `` `code` ``
+- Code blocks: ` ``` ` ... ` ``` `
+- Headings: `# Heading 1`, `## Heading 2`, etc.
+- Lists: `- item` or `1. numbered`
+- Links: `[text](url)`
+
+Use the **Preview** tab in the editor to see how your content will look.
+
+### Saving & Publishing
+
+- **Save as Draft**: Keep your post as a draft for later editing
+- **Publish**: Make your post visible to readers immediately
+- **Edit Later**: Click on any draft in the Posts list to continue editing
+
+## Environment Configuration
+
+Create a `.env` file in the `frontend` directory:
+
+```env
+PUBLIC_POSTS_API_URL=http://localhost:3013
+PUBLIC_AUTH_API_URL=http://localhost:3010
+PUBLIC_AI_SERVICE_URL=http://localhost:8000
+```
+
+The AI service URL is required for the draft builder to work. Ensure the AI service is running on port 8000.
+
 ## Troubleshooting
 
 ### Port Already in Use
@@ -169,6 +232,13 @@ export default {
 
 Ensure backend is running and CORS is configured to allow `http://localhost:5173`.
 
+### AI Draft Not Generating
+
+1. Check that `PUBLIC_AI_SERVICE_URL` is set correctly in `.env`
+2. Ensure the AI service is running: `http://localhost:8000/healthz`
+3. Check browser console for network errors
+4. Verify your network can reach the AI service
+
 ### Type Errors
 
 Run `npm run check` to see all type issues and fix them.
@@ -185,8 +255,8 @@ npm install
 ## Next Steps
 
 1. ✅ Installation complete
-2. Create your first posts
-3. Organize with categories and tags
-4. Write technical content
-5. Track impact metrics
-6. Share insights with teams
+2. Generate your first draft with AI
+3. Edit and improve with AI assistance
+4. Publish your posts
+5. Organize with categories and tags
+6. Track impact metrics
