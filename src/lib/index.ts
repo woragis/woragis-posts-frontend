@@ -18,6 +18,8 @@ export type {
 
 // API Clients
 export { postsClient } from './api/posts';
+export { aiClient } from './api/ai';
+export type { Agent, Provider, ChatRequest, ChatResponse, StreamChunk } from './api/ai';
 export { problemSolutionsClient } from './api/problem-solutions';
 export { caseStudiesClient } from './api/case-studies';
 export { technicalWritingsClient } from './api/technical-writings';
