@@ -14,8 +14,21 @@ class PostsApiClient extends BaseApiClient {
 		return this.create<Post>(data);
 	}
 
-	async listPosts(page = 1, limit = 10) {
-		return this.list<Post>(page, limit);
+	async listPosts(page = 1, limit = 10, status?: 'draft' | 'published' | 'archived') {
+		const params = new URLSearchParams({ page: String(page), limit: String(limit) });
+		if (status) {
+			params.append('status', status);
+		}
+		const response = await this.client.get<any>(`/?${params.toString()}`);
+		return response.data;
+	}
+
+	async listDrafts(page = 1, limit = 10) {
+		return this.listPosts(page, limit, 'draft');
+	}
+
+	async listPublished(page = 1, limit = 10) {
+		return this.listPosts(page, limit, 'published');
 	}
 
 	async getPostBySlug(slug: string): Promise<Post> {

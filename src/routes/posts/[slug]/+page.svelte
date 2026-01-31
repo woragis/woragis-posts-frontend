@@ -3,6 +3,7 @@
 	import { postsClient, auth } from '$lib';
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
+	import MarkdownDisplay from '$lib/components/MarkdownDisplay.svelte';
 
 	let post: any = null;
 	let isLoading = true;
@@ -59,8 +60,8 @@
 					</header>
 
 					{#if post.content}
-						<div class="prose prose-sm max-w-none mb-8">
-							{@html post.content}
+						<div class="mb-8">
+							<MarkdownDisplay markdown={post.content} />
 						</div>
 					{/if}
 

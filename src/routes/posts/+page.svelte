@@ -17,6 +17,7 @@
 	let error = '';
 	let currentPage = 1;
 	let totalPages = 1;
+	let selectedStatus: 'all' | 'draft' | 'published' = 'all';
 
 	onMount(async () => {
 		if (!$auth.isAuthenticated) {
@@ -30,9 +31,11 @@
 	async function loadPosts() {
 		isLoading = true;
 		error = '';
+		currentPage = 1;
 
 		try {
-			const response = await postsClient.listPosts(currentPage, 10);
+			const status = selectedStatus === 'all' ? undefined : selectedStatus;
+			const response = await postsClient.listPosts(currentPage, 10, status as any);
 			posts = (response.data || []) as PostWithMetadata[];
 			// Assume pagination info in response
 			totalPages = Math.ceil((response.meta?.total || 0) / 10);
@@ -41,6 +44,10 @@
 		} finally {
 			isLoading = false;
 		}
+	}
+
+	function handleStatusChange() {
+		loadPosts();
 	}
 
 	function nextPage() {
@@ -71,6 +78,25 @@
 				</a>
 			</div>
 
+			<!-- Status Filter -->
+			<div class="mb-6 flex gap-2">
+				{#each ['all', 'draft', 'published'] as status}
+					<button
+						on:click={() => {
+							selectedStatus = status as any;
+							handleStatusChange();
+						}}
+						class={`px-4 py-2 rounded-lg font-medium text-sm transition ${
+							selectedStatus === status
+								? 'bg-blue-600 text-white'
+								: 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
+						}`}
+					>
+						{status === 'all' ? 'All Posts' : status === 'draft' ? 'Drafts' : 'Published'}
+					</button>
+				{/each}
+			</div>
+
 			{#if error}
 				<div class="rounded-md bg-red-50 p-4 mb-4">
 					<p class="text-sm text-red-700">{error}</p>
@@ -81,7 +107,15 @@
 				<p class="text-gray-500">Loading posts...</p>
 			{:else if posts.length === 0}
 				<div class="text-center py-12">
-					<p class="text-gray-500 mb-4">No posts yet</p>
+					<p class="text-gray-500 mb-4">
+						{#if selectedStatus === 'draft'}
+							No drafts yet
+						{:else if selectedStatus === 'published'}
+							No published posts yet
+						{:else}
+							No posts yet
+						{/if}
+					</p>
 					<a
 						href="/posts/new"
 						class="text-blue-600 hover:text-blue-500">Create your first post</a
@@ -93,7 +127,7 @@
 						{#each posts as post (post.id)}
 							<li>
 								<a
-									href={`/posts/${post.slug}`}
+									href={post.status === 'draft' ? `/posts/${post.slug}/edit` : `/posts/${post.slug}`}
 									class="px-4 py-4 sm:px-6 hover:bg-gray-50 flex justify-between items-center"
 								>
 									<div class="min-w-0 flex-1">
@@ -108,7 +142,9 @@
 											class={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
 												post.status === 'published'
 													? 'bg-green-100 text-green-800'
-													: 'bg-yellow-100 text-yellow-800'
+													: post.status === 'draft'
+														? 'bg-yellow-100 text-yellow-800'
+														: 'bg-gray-100 text-gray-800'
 											}`}
 										>
 											{post.status}
