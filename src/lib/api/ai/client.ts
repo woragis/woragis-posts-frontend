@@ -10,17 +10,19 @@ export type Agent =
 export type Provider = 'openai' | 'anthropic' | 'xai' | 'manus' | 'cipher';
 
 export interface ChatRequest {
+	user_id: string;
+	prompt: string;
 	agent: Agent;
-	input: string;
-	system?: string;
-	temperature?: number;
-	model?: string;
-	provider?: Provider;
+	post_id?: string;
 }
 
 export interface ChatResponse {
+	id: string;
+	user_id: string;
 	agent: string;
-	output: string;
+	status: 'pending' | 'completed' | 'error';
+	response?: string;
+	error?: string;
 }
 
 export interface StreamChunk {
@@ -41,28 +43,22 @@ class AIServiceClient {
 	}
 
 	/**
-	 * Single chat request (non-streaming)
+	 * Generate draft - single chat request (non-streaming)
 	 */
-	async chat(
+	async generateDraft(
+		userId: string,
+		prompt: string,
 		agent: Agent,
-		input: string,
-		options?: {
-			system?: string;
-			temperature?: number;
-			model?: string;
-			provider?: Provider;
-		}
+		postId?: string
 	): Promise<ChatResponse> {
 		const payload: ChatRequest = {
+			user_id: userId,
+			prompt,
 			agent,
-			input,
-			system: options?.system,
-			temperature: options?.temperature,
-			model: options?.model,
-			provider: options?.provider || 'openai'
+			post_id: postId
 		};
 
-		const response = await fetch(`${this.baseUrl}/v1/chat`, {
+		const response = await fetch(`${this.baseUrl}/api/v1/chats/generate`, {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
 			body: JSON.stringify(payload)
@@ -77,29 +73,23 @@ class AIServiceClient {
 	}
 
 	/**
-	 * Streaming chat request - returns async generator of chunks
+	 * Streaming draft generation - returns async generator of chunks
 	 * Each chunk is NDJSON format: { "delta": "text" } or { "done": true, "output": "full text" }
 	 */
-	async *chatStream(
+	async *generateDraftStream(
+		userId: string,
+		prompt: string,
 		agent: Agent,
-		input: string,
-		options?: {
-			system?: string;
-			temperature?: number;
-			model?: string;
-			provider?: Provider;
-		}
+		postId?: string
 	): AsyncGenerator<StreamChunk, void, unknown> {
 		const payload: ChatRequest = {
+			user_id: userId,
+			prompt,
 			agent,
-			input,
-			system: options?.system,
-			temperature: options?.temperature,
-			model: options?.model,
-			provider: options?.provider || 'openai'
+			post_id: postId
 		};
 
-		const response = await fetch(`${this.baseUrl}/v1/chat/stream`, {
+		const response = await fetch(`${this.baseUrl}/api/v1/chats/generate`, {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
 			body: JSON.stringify(payload)
@@ -156,14 +146,75 @@ class AIServiceClient {
 	}
 
 	/**
-	 * Get list of available agents
+	 * Improve content - streaming improvement request
 	 */
-	async listAgents(): Promise<string[]> {
-		const response = await fetch(`${this.baseUrl}/v1/agents`);
+	async *improveContent(
+		userId: string,
+		postId: string,
+		improvement: string,
+		agent: Agent = 'auto'
+	): AsyncGenerator<StreamChunk, void, unknown> {
+		const payload: ChatRequest = {
+			user_id: userId,
+			prompt: improvement,
+			agent,
+			post_id: postId
+		};
+
+		const response = await fetch(`${this.baseUrl}/api/v1/posts/${postId}/ai/improve`, {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify(payload)
+		});
+
 		if (!response.ok) {
-			throw new Error(`Failed to fetch agents: ${response.status}`);
+			const error = await response.text();
+			throw new Error(`AI service error: ${response.status} - ${error}`);
 		}
-		return response.json();
+
+		if (!response.body) {
+			throw new Error('Response body is empty');
+		}
+
+		const reader = response.body.getReader();
+		const decoder = new TextDecoder();
+		let buffer = '';
+
+		try {
+			while (true) {
+				const { done, value } = await reader.read();
+				if (done) break;
+
+				buffer += decoder.decode(value, { stream: true });
+				const lines = buffer.split('\n');
+
+				// Keep the last incomplete line in the buffer
+				buffer = lines.pop() || '';
+
+				for (const line of lines) {
+					if (line.trim()) {
+						try {
+							const chunk: StreamChunk = JSON.parse(line);
+							yield chunk;
+						} catch (err) {
+							console.error('Failed to parse stream chunk:', line, err);
+						}
+					}
+				}
+			}
+
+			// Process any remaining data in the buffer
+			if (buffer.trim()) {
+				try {
+					const chunk: StreamChunk = JSON.parse(buffer);
+					yield chunk;
+				} catch (err) {
+					console.error('Failed to parse final stream chunk:', buffer, err);
+				}
+			}
+		} finally {
+			reader.releaseLock();
+		}
 	}
 }
 

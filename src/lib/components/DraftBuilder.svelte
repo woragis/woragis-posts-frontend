@@ -1,22 +1,64 @@
 <script lang="ts">
 	import { aiClient, type Agent } from '$lib/api/ai';
+	import { auth } from '$lib/stores/auth';
 	import StreamingTextDisplay from './StreamingTextDisplay.svelte';
 
 	export let onDraftAccepted: (draft: string) => void = () => {};
+	export let postId: string | undefined = undefined;
 
 	let context = '';
 	let agent: Agent = 'auto';
-	let temperature = 0.7;
 	let isLoading = false;
 	let streamContent = '';
 	let error = '';
 	let controller: AbortController | null = null;
+	let tone: 'formal' | 'casual' | 'technical' | 'friendly' = 'friendly';
+	let length: 'short' | 'medium' | 'long' = 'medium';
+	let showPresets = false;
 
 	const agents: Agent[] = ['auto', 'entrepreneur', 'strategist', 'economist', 'startup'];
+
+	const contextTemplates = {
+		technology: "Topic: [Software Technology]\nKey Points: [Core concepts, implementation details]\nTarget Audience: [Developers/Engineers]\nTone: Technical, clear explanations\nLength: [Specify desired length]",
+		business: "Topic: [Business Strategy/Insight]\nKey Points: [Main argument, supporting data]\nTarget Audience: [Business professionals]\nTone: Professional, data-driven\nLength: [Specify desired length]",
+		tutorial: "Topic: [Tutorial Subject]\nStep-by-step Process: [Outline steps]\nTarget Audience: [Beginners/Intermediate]\nPrerequisites: [What readers need to know]\nLength: [Specify desired length]",
+		case_study: "Project/Company: [Name]\nChallenge: [Problem statement]\nSolution: [Approach taken]\nResults: [Outcomes and metrics]\nKey Learnings: [Takeaways]",
+		thought_leadership: "Topic: [Industry Insight]\nCurrent Situation: [Context]\nFuture Vision: [Where this is heading]\nCall to Action: [What readers should do]\nTone: Authoritative, visionary"
+	};
+
+	function insertTemplate(template: string) {
+		context = template;
+		showPresets = false;
+	}
+
+	function applyToneToPrompt() {
+		const toneDescriptions = {
+			formal: "Use a formal, professional tone throughout.",
+			casual: "Use a casual, conversational tone.",
+			technical: "Use technical terminology and detailed explanations.",
+			friendly: "Use a friendly, approachable tone."
+		};
+
+		const lengthHints = {
+			short: "Keep it concise, around 300-500 words.",
+			medium: "Medium length, around 800-1200 words.",
+			long: "Comprehensive piece, around 1500-2500 words."
+		};
+
+		return `${context}\n\n[Writing Style: ${toneDescriptions[tone]}]\n[${lengthHints[length]}]`;
+	}
 
 	async function generateDraft() {
 		if (!context.trim()) {
 			error = 'Please provide article context';
+			return;
+		}
+
+		let authState: any;
+		auth.subscribe(state => authState = state);
+
+		if (!authState?.user?.id) {
+			error = 'User not authenticated';
 			return;
 		}
 
@@ -26,14 +68,13 @@
 		controller = new AbortController();
 
 		try {
-			const systemPrompt =
-				'You are a professional content writer. Generate a well-structured article based on the provided context. ' +
-				'Start directly with the content, no preamble. Format with clear sections, use Markdown formatting for emphasis and structure.';
-
-			for await (const chunk of aiClient.chatStream(agent, context, {
-				system: systemPrompt,
-				temperature
-			})) {
+			const fullPrompt = applyToneToPrompt();
+			for await (const chunk of aiClient.generateDraftStream(
+				authState.user.id,
+				fullPrompt,
+				agent,
+				postId
+			)) {
 				// Check if generation was cancelled
 				if (controller?.signal.aborted) {
 					break;
@@ -73,6 +114,12 @@
 	function regenerate() {
 		generateDraft();
 	}
+
+	function copyToClipboard() {
+		navigator.clipboard.writeText(streamContent);
+	}
+
+	$: charCount = context.length;
 </script>
 
 <div class="space-y-4">
@@ -80,26 +127,56 @@
 		<h3 class="text-lg font-semibold text-gray-900 mb-4">AI Draft Builder</h3>
 
 		<div class="space-y-4">
-			<!-- Context Input -->
+			<!-- Context Input with Templates -->
 			<div>
-				<label for="context" class="block text-sm font-medium text-gray-700 mb-2">
-					Article Context or Brief
-				</label>
+				<div class="flex justify-between items-center mb-2">
+					<label for="context" class="block text-sm font-medium text-gray-700">
+						Article Context or Brief
+					</label>
+					<button
+						type="button"
+						on:click={() => (showPresets = !showPresets)}
+						class="text-xs text-blue-600 hover:text-blue-700 font-medium"
+					>
+						{showPresets ? 'Hide' : 'Show'} Templates
+					</button>
+				</div>
+
+				{#if showPresets}
+					<div class="mb-3 grid grid-cols-2 gap-2 md:grid-cols-5 p-3 bg-blue-50 rounded-lg border border-blue-200">
+						{#each Object.entries(contextTemplates) as [key, template]}
+							<button
+								type="button"
+								on:click={() => insertTemplate(template)}
+								class="px-2 py-2 text-xs font-medium bg-white border border-gray-300 rounded hover:bg-blue-50 transition"
+								title={key}
+							>
+								{key.replace('_', ' ')}
+							</button>
+						{/each}
+					</div>
+				{/if}
+
 				<textarea
 					id="context"
 					bind:value={context}
 					placeholder="Describe the article you want to create. Include topic, key points, target audience, tone, etc."
 					disabled={isLoading}
-					class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100"
-					rows="5"
+					class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100 font-mono text-sm"
+					rows="6"
 				></textarea>
-				<p class="text-xs text-gray-500 mt-1">
-					Example: "Write a beginner's guide to Go microservices. Cover basic concepts, best practices, and common pitfalls. Tone: friendly but professional."
-				</p>
+				<div class="mt-1 flex justify-between items-center">
+					<p class="text-xs text-gray-500">
+						Example: "Write a beginner's guide to Go microservices. Cover basic concepts, best practices..."
+					</p>
+					<p class="text-xs text-gray-400">
+						{charCount} characters
+					</p>
+				</div>
 			</div>
 
-			<!-- Settings Row -->
-			<div class="grid grid-cols-2 gap-4">
+			<!-- Settings: Agent, Tone, Length -->
+			<div class="grid grid-cols-3 gap-4">
 				<div>
 					<label for="agent" class="block text-sm font-medium text-gray-700 mb-2">
 						Agent Type
@@ -108,7 +185,7 @@
 						id="agent"
 						bind:value={agent}
 						disabled={isLoading}
-						class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100"
+						class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100 text-sm"
 					>
 						{#each agents as a}
 							<option value={a}>{a}</option>
@@ -117,36 +194,56 @@
 				</div>
 
 				<div>
-					<label for="temperature" class="block text-sm font-medium text-gray-700 mb-2">
-						Creativity ({temperature.toFixed(2)})
+					<label for="tone" class="block text-sm font-medium text-gray-700 mb-2">
+						Tone
 					</label>
-					<input
-						id="temperature"
-						type="range"
-						bind:value={temperature}
-						min="0"
-						max="1"
-						step="0.1"
+					<select
+						id="tone"
+						bind:value={tone}
 						disabled={isLoading}
-						class="w-full accent-blue-600 disabled:opacity-50"
-					/>
-					<p class="text-xs text-gray-500 mt-1">
-						{#if temperature < 0.3}
-							Focused & deterministic
-						{:else if temperature < 0.7}
-							Balanced
-						{:else}
-							Creative & diverse
-						{/if}
-					</p>
+						class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100 text-sm"
+					>
+						<option value="formal">Formal</option>
+						<option value="casual">Casual</option>
+						<option value="technical">Technical</option>
+						<option value="friendly">Friendly</option>
+					</select>
+				</div>
+
+				<div>
+					<label for="length" class="block text-sm font-medium text-gray-700 mb-2">
+						Length
+					</label>
+					<select
+						id="length"
+						bind:value={length}
+						disabled={isLoading}
+						class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100 text-sm"
+					>
+						<option value="short">Short (300-500w)</option>
+						<option value="medium">Medium (800-1200w)</option>
+						<option value="long">Long (1500-2500w)</option>
+					</select>
 				</div>
 			</div>
 		</div>
 
 		<!-- Streaming Display -->
 		<div class="mt-6">
-			<label for="generated-content" class="block text-sm font-medium text-gray-700 mb-2">Generated Content</label>
-			<div id="generated-content">
+			<div class="flex justify-between items-center mb-2">
+				<label class="block text-sm font-medium text-gray-700">Generated Content</label>
+				{#if streamContent && !isLoading}
+					<button
+						type="button"
+						on:click={copyToClipboard}
+						class="text-xs text-gray-600 hover:text-gray-900 font-medium"
+						title="Copy to clipboard"
+					>
+						📋 Copy
+					</button>
+				{/if}
+			</div>
+			<div class="bg-gray-50 border border-gray-200 rounded-lg p-4 min-h-32">
 				<StreamingTextDisplay
 					{isLoading}
 					{streamContent}
@@ -161,7 +258,7 @@
 			<button
 				on:click={generateDraft}
 				disabled={isLoading || !context.trim()}
-				class="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+				class="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed font-medium text-sm transition"
 			>
 				{isLoading ? 'Generating...' : 'Generate Draft'}
 			</button>
@@ -169,16 +266,18 @@
 			{#if streamContent && !isLoading}
 				<button
 					on:click={regenerate}
-					class="flex-1 px-4 py-2 bg-gray-200 text-gray-900 rounded-lg hover:bg-gray-300 font-medium"
+					type="button"
+					class="flex-1 px-4 py-2 bg-gray-200 text-gray-900 rounded-lg hover:bg-gray-300 font-medium text-sm transition"
 				>
-					Regenerate
+					🔄 Regenerate
 				</button>
 
 				<button
 					on:click={acceptDraft}
-					class="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 font-medium"
+					type="button"
+					class="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 font-medium text-sm transition"
 				>
-					Use This Draft
+					✓ Use Draft
 				</button>
 			{/if}
 		</div>

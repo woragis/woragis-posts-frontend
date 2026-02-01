@@ -74,18 +74,21 @@
 		improveController = new AbortController();
 
 		try {
-			const systemPrompt =
-				'You are an expert content editor. Improve the following article based on the user request. ' +
-				'Return only the improved markdown content, no explanation or preamble.';
+			let authState: any;
+			auth.subscribe(state => authState = state);
 
-			const userInput =
-				`Original content:\n\n${content}\n\n` +
-				`Improvement request: ${improveRequest}`;
+			if (!authState?.user?.id) {
+				improveError = 'User not authenticated';
+				isImproving = false;
+				return;
+			}
 
-			for await (const chunk of aiClient.chatStream('auto', userInput, {
-				system: systemPrompt,
-				temperature: 0.7
-			})) {
+			for await (const chunk of aiClient.improveContent(
+				authState.user.id,
+				post.id,
+				improveRequest,
+				'auto'
+			)) {
 				if (improveController?.signal.aborted) {
 					break;
 				}
