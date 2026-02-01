@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { aiClient, type Agent } from '$lib/api/ai';
 	import { auth } from '$lib/stores/auth';
+	import EnhancedStreamingDisplay from './EnhancedStreamingDisplay.svelte';
 	import StreamingTextDisplay from './StreamingTextDisplay.svelte';
 
 	export let onDraftAccepted: (draft: string) => void = () => {};
@@ -231,7 +232,7 @@
 		<!-- Streaming Display -->
 		<div class="mt-6">
 			<div class="flex justify-between items-center mb-2">
-				<label class="block text-sm font-medium text-gray-700">Generated Content</label>
+				<label for="generated-output" class="block text-sm font-medium text-gray-700">Generated Content</label>
 				{#if streamContent && !isLoading}
 					<button
 						type="button"
@@ -243,8 +244,8 @@
 					</button>
 				{/if}
 			</div>
-			<div class="bg-gray-50 border border-gray-200 rounded-lg p-4 min-h-32">
-				<StreamingTextDisplay
+			<div id="generated-output">
+				<EnhancedStreamingDisplay
 					{isLoading}
 					{streamContent}
 					{error}
