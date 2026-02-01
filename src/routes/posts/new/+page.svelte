@@ -4,6 +4,7 @@
 	import { postsClient, auth } from '$lib';
 	import DraftBuilder from '$lib/components/DraftBuilder.svelte';
 	import MarkdownEditor from '$lib/components/MarkdownEditor.svelte';
+	import RefinementControls from '$lib/components/RefinementControls.svelte';
 	import type { Post } from '$lib/api/types';
 
 	let title = '';
@@ -43,6 +44,10 @@
 		activeTab = 'blank';
 		// Scroll to editor
 		document.querySelector('[data-editor]')?.scrollIntoView({ behavior: 'smooth' });
+	}
+
+	function handleContentRefined(refinedContent: string) {
+		content = refinedContent;
 	}
 
 	async function saveDraft() {
@@ -205,6 +210,17 @@
 						</label>
 						<MarkdownEditor bind:markdown={content} showPreview />
 					</div>
+
+					<!-- Refinement Controls -->
+					{#if content.trim()}
+						<div>
+							<RefinementControls
+								{content}
+								agent="auto"
+								onContentUpdated={handleContentRefined}
+							/>
+						</div>
+					{/if}
 
 					<!-- Status -->
 					<div>
