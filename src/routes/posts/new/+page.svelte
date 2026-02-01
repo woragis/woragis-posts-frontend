@@ -5,6 +5,7 @@
 	import DraftBuilder from '$lib/components/DraftBuilder.svelte';
 	import MarkdownEditor from '$lib/components/MarkdownEditor.svelte';
 	import RefinementControls from '$lib/components/RefinementControls.svelte';
+	import VersionHistory from '$lib/components/VersionHistory.svelte';
 	import type { Post } from '$lib/api/types';
 
 	let title = '';
@@ -15,6 +16,7 @@
 	let isSaving = false;
 	let error = '';
 	let activeTab: 'ai' | 'blank' | 'template' = 'ai';
+	let versionHistoryRef: VersionHistory;
 
 	onMount(async () => {
 		if (!$auth.isAuthenticated) {
@@ -41,6 +43,7 @@
 
 	function handleDraftAccepted(draft: string) {
 		content = draft;
+		versionHistoryRef?.trackGeneration(draft, 'AI');
 		activeTab = 'blank';
 		// Scroll to editor
 		document.querySelector('[data-editor]')?.scrollIntoView({ behavior: 'smooth' });
@@ -48,6 +51,11 @@
 
 	function handleContentRefined(refinedContent: string) {
 		content = refinedContent;
+		versionHistoryRef?.trackRefinement(refinedContent, 'Polish');
+	}
+
+	function handleVersionRestore(version: any) {
+		content = version.content;
 	}
 
 	async function saveDraft() {
@@ -218,6 +226,16 @@
 								{content}
 								agent="auto"
 								onContentUpdated={handleContentRefined}
+							/>
+						</div>
+					{/if}
+
+					<!-- Version History -->
+					{#if content.trim()}
+						<div>
+							<VersionHistory
+								bind:this={versionHistoryRef}
+								onRestoreVersion={handleVersionRestore}
 							/>
 						</div>
 					{/if}
