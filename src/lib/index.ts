@@ -34,6 +34,8 @@ export type {
 	Post,
 	ProblemSolution,
 	CaseStudy,
+	CreateCaseStudyRequest,
+	UpdateCaseStudyRequest,
 	TechnicalWriting,
 	SystemDesign,
 	ImpactMetric,

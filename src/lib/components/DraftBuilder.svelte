@@ -1,64 +1,23 @@
 <script lang="ts">
-	import { aiClient, type Agent } from '$lib/api/ai';
+	import { postsClient } from '$lib/api/posts/client';
 	import { auth } from '$lib/stores/auth';
-	import EnhancedStreamingDisplay from './EnhancedStreamingDisplay.svelte';
 	import StreamingTextDisplay from './StreamingTextDisplay.svelte';
 
 	export let onDraftAccepted: (draft: string) => void = () => {};
-	export let postId: string | undefined = undefined;
 
-	let context = '';
-	let agent: Agent = 'auto';
+	let prompt = '';
 	let isLoading = false;
 	let streamContent = '';
 	let error = '';
-	let controller: AbortController | null = null;
-	let tone: 'formal' | 'casual' | 'technical' | 'friendly' = 'friendly';
-	let length: 'short' | 'medium' | 'long' = 'medium';
-	let showPresets = false;
-
-	const agents: Agent[] = ['auto', 'entrepreneur', 'strategist', 'economist', 'startup'];
-
-	const contextTemplates = {
-		technology: "Topic: [Software Technology]\nKey Points: [Core concepts, implementation details]\nTarget Audience: [Developers/Engineers]\nTone: Technical, clear explanations\nLength: [Specify desired length]",
-		business: "Topic: [Business Strategy/Insight]\nKey Points: [Main argument, supporting data]\nTarget Audience: [Business professionals]\nTone: Professional, data-driven\nLength: [Specify desired length]",
-		tutorial: "Topic: [Tutorial Subject]\nStep-by-step Process: [Outline steps]\nTarget Audience: [Beginners/Intermediate]\nPrerequisites: [What readers need to know]\nLength: [Specify desired length]",
-		case_study: "Project/Company: [Name]\nChallenge: [Problem statement]\nSolution: [Approach taken]\nResults: [Outcomes and metrics]\nKey Learnings: [Takeaways]",
-		thought_leadership: "Topic: [Industry Insight]\nCurrent Situation: [Context]\nFuture Vision: [Where this is heading]\nCall to Action: [What readers should do]\nTone: Authoritative, visionary"
-	};
-
-	function insertTemplate(template: string) {
-		context = template;
-		showPresets = false;
-	}
-
-	function applyToneToPrompt() {
-		const toneDescriptions = {
-			formal: "Use a formal, professional tone throughout.",
-			casual: "Use a casual, conversational tone.",
-			technical: "Use technical terminology and detailed explanations.",
-			friendly: "Use a friendly, approachable tone."
-		};
-
-		const lengthHints = {
-			short: "Keep it concise, around 300-500 words.",
-			medium: "Medium length, around 800-1200 words.",
-			long: "Comprehensive piece, around 1500-2500 words."
-		};
-
-		return `${context}\n\n[Writing Style: ${toneDescriptions[tone]}]\n[${lengthHints[length]}]`;
-	}
+	let generatedPostId = '';
 
 	async function generateDraft() {
-		if (!context.trim()) {
-			error = 'Please provide article context';
+		if (!prompt.trim()) {
+			error = 'Please provide a prompt';
 			return;
 		}
 
-		let authState: any;
-		auth.subscribe(state => authState = state);
-
-		if (!authState?.user?.id) {
+		if (!$auth?.isAuthenticated) {
 			error = 'User not authenticated';
 			return;
 		}
@@ -66,34 +25,23 @@
 		isLoading = true;
 		streamContent = '';
 		error = '';
-		controller = new AbortController();
+		generatedPostId = '';
 
 		try {
-			const fullPrompt = applyToneToPrompt();
-			for await (const chunk of aiClient.generateDraftStream(
-				authState.user.id,
-				fullPrompt,
-				agent,
-				postId
-			)) {
-				// Check if generation was cancelled
-				if (controller?.signal.aborted) {
-					break;
-				}
+			const response = await postsClient.generatePostFromAI({
+				prompt: prompt.trim()
+			});
 
-				if (chunk.error) {
-					error = chunk.error;
-					isLoading = false;
-					return;
-				}
+			if (response.postId) {
+				generatedPostId = response.postId;
+				streamContent = `Post generation started (ID: ${generatedPostId}). Checking for generated content...`;
+				isLoading = false;
 
-				if (chunk.delta) {
-					streamContent += chunk.delta;
-				}
-
-				if (chunk.done) {
-					isLoading = false;
-				}
+				// Poll for completion
+				await pollForGeneration(response.postId);
+			} else {
+				error = 'Failed to start generation: No post ID returned';
+				isLoading = false;
 			}
 		} catch (err) {
 			error = err instanceof Error ? err.message : 'Failed to generate draft';
@@ -101,190 +49,117 @@
 		}
 	}
 
-	function cancelGeneration() {
-		controller?.abort();
-		isLoading = false;
-	}
+	async function pollForGeneration(postId: string, maxAttempts = 30) {
+		let attempts = 0;
 
-	function acceptDraft() {
-		if (streamContent.trim()) {
-			onDraftAccepted(streamContent);
+		while (attempts < maxAttempts) {
+			try {
+				await new Promise((resolve) => setTimeout(resolve, 1000)); // Wait 1 second before polling
+
+				const post = await postsClient.getPost(postId);
+
+				if (post?.status === 'draft') {
+					// Generation complete!
+					streamContent = post.content || '';
+					onDraftAccepted(streamContent);
+					isLoading = false;
+					return;
+				} else if (post?.status === 'generating') {
+					// Still generating, update UI
+					streamContent = `Still generating... (attempt ${attempts + 1}/${maxAttempts})`;
+				} else {
+					streamContent = `Generation status: ${post?.status}`;
+				}
+
+				attempts++;
+			} catch (err) {
+				console.error('Error polling for generation:', err);
+				attempts++;
+			}
 		}
+
+		error = 'Generation took too long. Please check back later.';
+		isLoading = false;
 	}
 
 	function regenerate() {
 		generateDraft();
 	}
-
-	function copyToClipboard() {
-		navigator.clipboard.writeText(streamContent);
-	}
-
-	$: charCount = context.length;
 </script>
 
 <div class="space-y-4">
-	<div class="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
-		<h3 class="text-lg font-semibold text-gray-900 mb-4">AI Draft Builder</h3>
+	<div class="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
+		<h3 class="mb-4 text-lg font-semibold text-gray-900">AI Draft Builder</h3>
 
 		<div class="space-y-4">
-			<!-- Context Input with Templates -->
+			<!-- Prompt Input -->
 			<div>
-				<div class="flex justify-between items-center mb-2">
-					<label for="context" class="block text-sm font-medium text-gray-700">
-						Article Context or Brief
-					</label>
-					<button
-						type="button"
-						on:click={() => (showPresets = !showPresets)}
-						class="text-xs text-blue-600 hover:text-blue-700 font-medium"
-					>
-						{showPresets ? 'Hide' : 'Show'} Templates
-					</button>
-				</div>
-
-				{#if showPresets}
-					<div class="mb-3 grid grid-cols-2 gap-2 md:grid-cols-5 p-3 bg-blue-50 rounded-lg border border-blue-200">
-						{#each Object.entries(contextTemplates) as [key, template]}
-							<button
-								type="button"
-								on:click={() => insertTemplate(template)}
-								class="px-2 py-2 text-xs font-medium bg-white border border-gray-300 rounded hover:bg-blue-50 transition"
-								title={key}
-							>
-								{key.replace('_', ' ')}
-							</button>
-						{/each}
-					</div>
-				{/if}
-
+				<label for="prompt" class="mb-2 block text-sm font-medium text-gray-700">
+					Article Prompt
+				</label>
 				<textarea
-					id="context"
-					bind:value={context}
-					placeholder="Describe the article you want to create. Include topic, key points, target audience, tone, etc."
+					id="prompt"
+					bind:value={prompt}
+					placeholder="Describe the article you want to create. Be specific about the topic, key points, audience, and tone."
 					disabled={isLoading}
-					class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100 font-mono text-sm"
-					rows="6"
+					class="w-full rounded-lg border border-gray-300 px-4 py-3 focus:border-transparent focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
+					rows="5"
 				></textarea>
-				<div class="mt-1 flex justify-between items-center">
-					<p class="text-xs text-gray-500">
-						Example: "Write a beginner's guide to Go microservices. Cover basic concepts, best practices..."
-					</p>
-					<p class="text-xs text-gray-400">
-						{charCount} characters
-					</p>
-				</div>
-			</div>
-
-			<!-- Settings: Agent, Tone, Length -->
-			<div class="grid grid-cols-3 gap-4">
-				<div>
-					<label for="agent" class="block text-sm font-medium text-gray-700 mb-2">
-						Agent Type
-					</label>
-					<select
-						id="agent"
-						bind:value={agent}
-						disabled={isLoading}
-						class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100 text-sm"
-					>
-						{#each agents as a}
-							<option value={a}>{a}</option>
-						{/each}
-					</select>
-				</div>
-
-				<div>
-					<label for="tone" class="block text-sm font-medium text-gray-700 mb-2">
-						Tone
-					</label>
-					<select
-						id="tone"
-						bind:value={tone}
-						disabled={isLoading}
-						class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100 text-sm"
-					>
-						<option value="formal">Formal</option>
-						<option value="casual">Casual</option>
-						<option value="technical">Technical</option>
-						<option value="friendly">Friendly</option>
-					</select>
-				</div>
-
-				<div>
-					<label for="length" class="block text-sm font-medium text-gray-700 mb-2">
-						Length
-					</label>
-					<select
-						id="length"
-						bind:value={length}
-						disabled={isLoading}
-						class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100 text-sm"
-					>
-						<option value="short">Short (300-500w)</option>
-						<option value="medium">Medium (800-1200w)</option>
-						<option value="long">Long (1500-2500w)</option>
-					</select>
-				</div>
+				<p class="mt-1 text-xs text-gray-500">
+					Example: "Write a technical article comparing RabbitMQ vs HTTP for microservices. Target
+					audience: backend developers. Include trade-offs and when to use each."
+				</p>
 			</div>
 		</div>
 
 		<!-- Streaming Display -->
 		<div class="mt-6">
-			<div class="flex justify-between items-center mb-2">
-				<label for="generated-output" class="block text-sm font-medium text-gray-700">Generated Content</label>
-				{#if streamContent && !isLoading}
-					<button
-						type="button"
-						on:click={copyToClipboard}
-						class="text-xs text-gray-600 hover:text-gray-900 font-medium"
-						title="Copy to clipboard"
-					>
-						📋 Copy
-					</button>
-				{/if}
-			</div>
-			<div id="generated-output">
-				<EnhancedStreamingDisplay
+			<label for="generated-content" class="mb-2 block text-sm font-medium text-gray-700"
+				>Generated Content</label
+			>
+			<div id="generated-content">
+				<StreamingTextDisplay
 					{isLoading}
 					{streamContent}
 					{error}
-					onCancel={isLoading ? cancelGeneration : null}
+					onCancel={isLoading
+						? () => {
+								isLoading = false;
+							}
+						: null}
 				/>
 			</div>
 		</div>
 
 		<!-- Action Buttons -->
 		<div class="mt-6 flex gap-3">
-			<button
-				on:click={generateDraft}
-				disabled={isLoading || !context.trim()}
-				class="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed font-medium text-sm transition"
-			>
-				{isLoading ? 'Generating...' : 'Generate Draft'}
-			</button>
-
 			{#if streamContent && !isLoading}
 				<button
 					on:click={regenerate}
-					type="button"
-					class="flex-1 px-4 py-2 bg-gray-200 text-gray-900 rounded-lg hover:bg-gray-300 font-medium text-sm transition"
+					class="flex-1 rounded-lg bg-gray-200 px-4 py-2 font-medium text-gray-900 hover:bg-gray-300"
 				>
-					🔄 Regenerate
+					Regenerate
 				</button>
 
 				<button
-					on:click={acceptDraft}
-					type="button"
-					class="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 font-medium text-sm transition"
+					on:click={() => onDraftAccepted(streamContent)}
+					class="flex-1 rounded-lg bg-green-600 px-4 py-2 font-medium text-white hover:bg-green-700"
 				>
-					✓ Use Draft
+					Use This Draft
+				</button>
+			{:else}
+				<button
+					on:click={generateDraft}
+					disabled={isLoading || !prompt.trim()}
+					class="flex-1 rounded-lg bg-blue-600 px-4 py-2 font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+				>
+					{isLoading ? 'Generating...' : 'Generate Post'}
 				</button>
 			{/if}
 		</div>
 
 		{#if error}
-			<div class="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
+			<div class="mt-4 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">
 				{error}
 			</div>
 		{/if}

@@ -10,7 +10,7 @@ export interface Post {
 	slug: string;
 	content?: string;
 	excerpt?: string;
-	status?: 'draft' | 'published' | 'archived';
+	status?: 'draft' | 'published' | 'archived' | 'generating';
 	authorId?: string;
 	publishedAt?: string;
 	createdAt?: string;
@@ -67,6 +67,20 @@ export interface CaseStudy {
 	status?: 'draft' | 'published' | 'archived';
 	createdAt?: string;
 	updatedAt?: string;
+}
+
+export interface CreateCaseStudyRequest {
+	title: string;
+	slug?: string;
+	description?: string;
+	status?: 'draft' | 'published' | 'archived';
+}
+
+export interface UpdateCaseStudyRequest {
+	title?: string;
+	slug?: string;
+	description?: string;
+	status?: 'draft' | 'published' | 'archived';
 }
 
 // ===== Technical Writings Domain =====

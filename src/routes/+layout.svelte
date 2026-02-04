@@ -3,13 +3,14 @@
 	import favicon from '$lib/assets/favicon.svg';
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
-	import { auth, logoutUser } from '$lib';
+	import { auth, logoutUser, initializeAuth } from '$lib';
 
 	let { children } = $props();
 	let isMobileMenuOpen = false;
 
 	onMount(async () => {
-		// Auth check happens in page components
+		// Initialize auth from cookies on page load
+		await initializeAuth();
 	});
 
 	async function handleLogout() {
@@ -26,27 +27,33 @@
 
 <div class="min-h-screen bg-gray-50">
 	<!-- Navigation -->
-	<nav class="bg-white shadow-sm sticky top-0 z-40">
-		<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-			<div class="flex justify-between items-center h-16">
+	<nav class="sticky top-0 z-40 bg-white shadow-sm">
+		<div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+			<div class="flex h-16 items-center justify-between">
 				<div class="flex items-center space-x-8">
 					<a href="/" class="text-xl font-bold text-gray-900">Posts</a>
 
 					{#if $auth.isAuthenticated}
-						<div class="hidden md:flex space-x-6">
-							<a href="/dashboard" class="text-gray-700 hover:text-gray-900 text-sm font-medium">
+						<div class="hidden space-x-6 md:flex">
+							<a href="/dashboard" class="text-sm font-medium text-gray-700 hover:text-gray-900">
 								Dashboard
 							</a>
-							<a href="/posts" class="text-gray-700 hover:text-gray-900 text-sm font-medium">
+							<a href="/posts" class="text-sm font-medium text-gray-700 hover:text-gray-900">
 								Posts
 							</a>
-							<a href="/problem-solutions" class="text-gray-700 hover:text-gray-900 text-sm font-medium">
+							<a
+								href="/problem-solutions"
+								class="text-sm font-medium text-gray-700 hover:text-gray-900"
+							>
 								Solutions
 							</a>
-							<a href="/case-studies" class="text-gray-700 hover:text-gray-900 text-sm font-medium">
+							<a href="/case-studies" class="text-sm font-medium text-gray-700 hover:text-gray-900">
 								Cases
 							</a>
-							<a href="/technical-writings" class="text-gray-700 hover:text-gray-900 text-sm font-medium">
+							<a
+								href="/technical-writings"
+								class="text-sm font-medium text-gray-700 hover:text-gray-900"
+							>
 								Writings
 							</a>
 						</div>
@@ -57,28 +64,18 @@
 					{#if $auth.isAuthenticated}
 						<div class="flex items-center space-x-3">
 							<span class="text-sm text-gray-700">
-								{$auth.user?.firstName} {$auth.user?.lastName}
+								{$auth.user?.firstName}
+								{$auth.user?.lastName}
 							</span>
-							<a
-								href="/auth/profile"
-								class="text-sm text-blue-600 hover:text-blue-500"
-							>
+							<a href="/auth/profile" class="text-sm text-blue-600 hover:text-blue-500">
 								Profile
 							</a>
-							<button
-								onclick={handleLogout}
-								class="text-sm text-blue-600 hover:text-blue-500"
-							>
+							<button onclick={handleLogout} class="text-sm text-blue-600 hover:text-blue-500">
 								Logout
 							</button>
 						</div>
 					{:else}
-						<a
-							href="/auth/login"
-							class="text-sm text-blue-600 hover:text-blue-500"
-						>
-							Sign in
-						</a>
+						<a href="/auth/login" class="text-sm text-blue-600 hover:text-blue-500"> Sign in </a>
 					{/if}
 				</div>
 			</div>
@@ -99,8 +96,9 @@
 	:global(body) {
 		margin: 0;
 		padding: 0;
-		font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu,
-			Cantarell, 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+		font-family:
+			-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Fira Sans',
+			'Droid Sans', 'Helvetica Neue', sans-serif;
 		-webkit-font-smoothing: antialiased;
 		-moz-osx-font-smoothing: grayscale;
 	}

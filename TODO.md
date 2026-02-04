@@ -1,3 +1,24 @@
+Integration tasks for Creative Service
+
+- Add UI components for image generation and editing:
+  - Upload input (image file) + preview
+  - Prompt editor, style selector, size selector, n
+  - Generate / Regenerate / Accept buttons
+  - Display generation progress and cost warnings
+
+- Client integration:
+  - Add API client method to call Posts backend endpoints for image generation
+  - Support multipart upload or base64 payload
+
+- Backend expectations:
+  - `POST /api/v1/posts/:id/creative/thumbnail` -> generates thumbnail and updates `featuredImage`
+  - `POST /api/v1/posts/:id/creative/edit` -> accepts image + prompt, returns generated image URL
+
+- Next steps:
+  - Implement creative client in posts backend
+  - Wire creative-service `v1/images/edit` endpoint
+  - Add integration tests and update docs
+
 # Posts Module - Frontend & Backend TODO
 
 **Last Updated:** January 30, 2026  

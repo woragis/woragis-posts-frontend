@@ -1,1 +1,1 @@
-export { caseStudiesClient } from './client';
+export { caseStudiesClient, CaseStudiesApiClient } from './client';

@@ -1,4 +1,5 @@
 import { config } from '$lib/config';
+import { tokenCookies } from '$lib/api/auth/cookies';
 
 export type Agent =
 	| 'economist'
@@ -58,9 +59,17 @@ class AIServiceClient {
 			post_id: postId
 		};
 
+		const token = tokenCookies.getAccessToken();
+		const headers: Record<string, string> = {
+			'Content-Type': 'application/json'
+		};
+		if (token) {
+			headers['Authorization'] = `Bearer ${token}`;
+		}
+
 		const response = await fetch(`${this.baseUrl}/api/v1/chats/generate`, {
 			method: 'POST',
-			headers: { 'Content-Type': 'application/json' },
+			headers,
 			body: JSON.stringify(payload)
 		});
 
@@ -89,9 +98,17 @@ class AIServiceClient {
 			post_id: postId
 		};
 
+		const token = tokenCookies.getAccessToken();
+		const headers: Record<string, string> = {
+			'Content-Type': 'application/json'
+		};
+		if (token) {
+			headers['Authorization'] = `Bearer ${token}`;
+		}
+
 		const response = await fetch(`${this.baseUrl}/api/v1/chats/generate`, {
 			method: 'POST',
-			headers: { 'Content-Type': 'application/json' },
+			headers,
 			body: JSON.stringify(payload)
 		});
 

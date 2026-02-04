@@ -47,6 +47,11 @@ class PostsApiClient extends BaseApiClient {
 	async deletePost(id: string): Promise<void> {
 		return this.delete(id);
 	}
+
+	async generatePostFromAI(data: { prompt: string }): Promise<{ postId: string; status: string }> {
+		const response = await this.client.post<any>('/generate-from-ai', data);
+		return response.data;
+	}
 }
 
 export const postsClient = new PostsApiClient();
