@@ -2,10 +2,8 @@
 	import { onMount } from 'svelte';
 	import { auth } from '$lib';
 	import { goto } from '$app/navigation';
-
-	let items: any[] = [];
-	let isLoading = true;
-	let error = '';
+	import { loadProblemSolutions } from '$lib/stores/problem-solutions';
+	import { ProblemSolutionsList } from '$lib/components/problem-solutions';
 
 	onMount(async () => {
 		if (!$auth.isAuthenticated) {
@@ -13,28 +11,28 @@
 			return;
 		}
 
-		isLoading = false;
+		await loadProblemSolutions();
 	});
+
+	function handleCreateClick() {
+		goto('/problem-solutions/new');
+	}
 </script>
 
 <div class="min-h-screen bg-gray-50">
 	<div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
 		<div class="px-4 py-6 sm:px-0">
-			<h1 class="text-3xl font-bold text-gray-900 mb-6">Problem Solutions</h1>
+			<div class="flex justify-between items-center mb-8">
+				<h1 class="text-3xl font-bold text-gray-900">Problem Solutions</h1>
+				<button
+					on:click={handleCreateClick}
+					class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
+				>
+					New Problem Solution
+				</button>
+			</div>
 
-			{#if error}
-				<div class="rounded-md bg-red-50 p-4 mb-4">
-					<p class="text-sm text-red-700">{error}</p>
-				</div>
-			{/if}
-
-			{#if isLoading}
-				<p class="text-gray-500">Loading...</p>
-			{:else}
-				<div class="bg-white rounded-lg shadow p-6 text-center">
-					<p class="text-gray-500">Coming soon</p>
-				</div>
-			{/if}
+			<ProblemSolutionsList />
 		</div>
 	</div>
 </div>

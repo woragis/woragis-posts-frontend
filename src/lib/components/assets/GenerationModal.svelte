@@ -26,9 +26,9 @@
 	export let domainType: string = 'post';
 	export let assetType: 'thumbnail' | 'featured-image' | 'og-image' = 'thumbnail';
 	export let customPrompt: string = '';
-	export let title: string = 'Generate Creative Assets';
-	export let description: string = 'Generate professional images for your content';
-	export let onClose: (() => void) | null = null;
+	export const title: string = 'Generate Creative Assets';
+	export const description: string = 'Generate professional images for your content';
+	export const onClose: (() => void) | null = null;
 
 	// Use contentId if provided, fallback to postId for backwards compatibility
 	$: actualContentId = contentId || postId;

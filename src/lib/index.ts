@@ -33,6 +33,9 @@ export { publicationsClient } from './api/publications/client';
 export type {
 	Post,
 	ProblemSolution,
+	MetricsData,
+	CreateProblemSolutionRequest,
+	UpdateProblemSolutionRequest,
 	CaseStudy,
 	CreateCaseStudyRequest,
 	UpdateCaseStudyRequest,

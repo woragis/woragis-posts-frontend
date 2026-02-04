@@ -47,15 +47,44 @@ export interface PostAsset {
 }
 
 // ===== Problem Solutions Domain =====
+export interface MetricsData {
+	before: string;
+	after: string;
+	improvement: string;
+}
+
 export interface ProblemSolution {
 	id: string;
-	title: string;
-	slug: string;
-	problemDescription?: string;
+	userId?: string;
+	problem: string;
+	context: string;
+	solution: string;
+	technologies: string[];
+	impact: string;
+	metrics?: MetricsData;
+	featured: boolean;
+	createdAt: string;
+	updatedAt: string;
+}
+
+export interface CreateProblemSolutionRequest {
+	problem: string;
+	context: string;
+	solution: string;
+	technologies: string[];
+	impact: string;
+	metrics?: MetricsData;
+	featured?: boolean;
+}
+
+export interface UpdateProblemSolutionRequest {
+	problem?: string;
+	context?: string;
 	solution?: string;
-	status?: 'draft' | 'published' | 'archived';
-	createdAt?: string;
-	updatedAt?: string;
+	technologies?: string[];
+	impact?: string;
+	metrics?: MetricsData;
+	featured?: boolean;
 }
 
 // ===== Case Studies Domain =====
