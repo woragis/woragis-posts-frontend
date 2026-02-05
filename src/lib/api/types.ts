@@ -318,13 +318,99 @@ export interface UpdateImpactMetricRequest {
 }
 
 // ===== AIML Integrations Domain =====
+export type IntegrationType =
+	| 'rag'
+	| 'llm'
+	| 'ml_model'
+	| 'computer_vision'
+	| 'nlp'
+	| 'recommendation'
+	| 'chatbot'
+	| 'anomaly_detection'
+	| 'predictive_analytics'
+	| 'generative_ai'
+	| 'other';
+
+export type Framework =
+	| 'openai'
+	| 'anthropic'
+	| 'huggingface'
+	| 'tensorflow'
+	| 'pytorch'
+	| 'langchain'
+	| 'llamaindex'
+	| 'cohere'
+	| 'google_ai'
+	| 'azure_ai'
+	| 'aws_bedrock'
+	| 'custom'
+	| 'other';
+
 export interface AimlIntegration {
 	id: string;
+	userId: string;
 	title: string;
+	description: string;
+	type: IntegrationType;
+	framework: Framework;
+	modelName?: string;
+	modelVersion?: string;
+	useCase?: string;
+	impact?: string;
+	technologies?: string[];
+	architecture?: string;
+	metrics?: string;
+	projectId?: string;
+	caseStudyId?: string;
+	featured: boolean;
+	displayOrder: number;
+	demoUrl?: string;
+	documentationUrl?: string;
+	githubUrl?: string;
+	createdAt: string;
+	updatedAt: string;
+}
+
+export interface CreateAimlIntegrationRequest {
+	title: string;
+	description: string;
+	type: IntegrationType;
+	framework: Framework;
+	modelName?: string;
+	modelVersion?: string;
+	useCase?: string;
+	impact?: string;
+	technologies?: string[];
+	architecture?: string;
+	metrics?: string;
+	projectId?: string;
+	caseStudyId?: string;
+	featured?: boolean;
+	displayOrder?: number;
+	demoUrl?: string;
+	documentationUrl?: string;
+	githubUrl?: string;
+}
+
+export interface UpdateAimlIntegrationRequest {
+	title?: string;
 	description?: string;
-	status?: 'draft' | 'published' | 'archived';
-	createdAt?: string;
-	updatedAt?: string;
+	type?: IntegrationType;
+	framework?: Framework;
+	modelName?: string;
+	modelVersion?: string;
+	useCase?: string;
+	impact?: string;
+	technologies?: string[];
+	architecture?: string;
+	metrics?: string;
+	projectId?: string;
+	caseStudyId?: string;
+	featured?: boolean;
+	displayOrder?: number;
+	demoUrl?: string;
+	documentationUrl?: string;
+	githubUrl?: string;
 }
 
 // ===== Reports Domain =====
