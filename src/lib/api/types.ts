@@ -113,35 +113,208 @@ export interface UpdateCaseStudyRequest {
 }
 
 // ===== Technical Writings Domain =====
+export type WritingType =
+	| 'article'
+	| 'documentation'
+	| 'tutorial'
+	| 'guide'
+	| 'blog_post'
+	| 'case_study'
+	| 'other';
+export type WritingPublicationPlatform =
+	| 'medium'
+	| 'dev_to'
+	| 'hashnode'
+	| 'personal_blog'
+	| 'github'
+	| 'company_blog'
+	| 'substack'
+	| 'linkedin'
+	| 'other';
+
 export interface TechnicalWriting {
 	id: string;
+	userId: string;
 	title: string;
-	slug: string;
+	description: string;
+	type: WritingType;
+	platform: WritingPublicationPlatform;
 	content?: string;
-	status?: 'draft' | 'published' | 'archived';
-	createdAt?: string;
-	updatedAt?: string;
+	url: string;
+	canonicalUrl?: string;
+	publishedAt?: string;
+	readingTime?: number;
+	topics?: string[];
+	technologies?: string[];
+	views?: number;
+	likes?: number;
+	shares?: number;
+	comments?: number;
+	projectId?: string;
+	caseStudyId?: string;
+	featured: boolean;
+	displayOrder: number;
+	excerpt?: string;
+	coverImageUrl?: string;
+	createdAt: string;
+	updatedAt: string;
+}
+
+export interface CreateTechnicalWritingRequest {
+	title: string;
+	description: string;
+	type: WritingType;
+	platform: WritingPublicationPlatform;
+	url: string;
+	content?: string;
+	excerpt?: string;
+	canonicalUrl?: string;
+	coverImageUrl?: string;
+	publishedAt?: string;
+	readingTime?: number;
+	topics?: string[];
+	technologies?: string[];
+	views?: number;
+	likes?: number;
+	shares?: number;
+	comments?: number;
+	projectId?: string;
+	caseStudyId?: string;
+	featured?: boolean;
+	displayOrder?: number;
+}
+
+export interface UpdateTechnicalWritingRequest {
+	title?: string;
+	description?: string;
+	type?: WritingType;
+	platform?: WritingPublicationPlatform;
+	url?: string;
+	content?: string;
+	excerpt?: string;
+	canonicalUrl?: string;
+	coverImageUrl?: string;
+	publishedAt?: string;
+	readingTime?: number;
+	topics?: string[];
+	technologies?: string[];
+	views?: number;
+	likes?: number;
+	shares?: number;
+	comments?: number;
+	projectId?: string;
+	caseStudyId?: string;
+	featured?: boolean;
+	displayOrder?: number;
 }
 
 // ===== System Designs Domain =====
+export interface ComponentsData {
+	components: Array<{
+		name: string;
+		description?: string;
+		responsibilities?: string[];
+	}>;
+}
+
 export interface SystemDesign {
 	id: string;
+	userId: string;
 	title: string;
-	slug: string;
+	description: string;
+	components?: ComponentsData;
+	dataFlow: string;
+	scalability: string;
+	reliability: string;
+	diagram?: string;
+	featured: boolean;
+	createdAt: string;
+	updatedAt: string;
+}
+
+export interface CreateSystemDesignRequest {
+	title: string;
+	description: string;
+	components?: ComponentsData;
+	dataFlow: string;
+	scalability: string;
+	reliability: string;
+	diagram?: string;
+	featured?: boolean;
+}
+
+export interface UpdateSystemDesignRequest {
+	title?: string;
 	description?: string;
-	status?: 'draft' | 'published' | 'archived';
-	createdAt?: string;
-	updatedAt?: string;
+	components?: ComponentsData;
+	dataFlow?: string;
+	scalability?: string;
+	reliability?: string;
+	diagram?: string;
+	featured?: boolean;
 }
 
 // ===== Impact Metrics Domain =====
+export type MetricType =
+	| 'projects_delivered'
+	| 'users_impacted'
+	| 'performance_improvement'
+	| 'cost_savings'
+	| 'time_saved';
+export type MetricUnit =
+	| 'count'
+	| 'percentage'
+	| 'currency'
+	| 'hours'
+	| 'days'
+	| 'months'
+	| 'years'
+	| 'milliseconds'
+	| 'seconds'
+	| 'minutes';
+export type EntityType = 'project' | 'problem_solution' | 'case_study' | 'system_design';
+
 export interface ImpactMetric {
 	id: string;
-	title: string;
-	metric?: number;
-	unit?: string;
-	createdAt?: string;
-	updatedAt?: string;
+	userId: string;
+	type: MetricType;
+	value: number;
+	unit: MetricUnit;
+	description?: string;
+	entityType?: EntityType;
+	entityId?: string;
+	periodStart?: string;
+	periodEnd?: string;
+	featured: boolean;
+	displayOrder: number;
+	createdAt: string;
+	updatedAt: string;
+}
+
+export interface CreateImpactMetricRequest {
+	type: MetricType;
+	value: number;
+	unit: MetricUnit;
+	description?: string;
+	entityType?: EntityType;
+	entityId?: string;
+	periodStart?: string;
+	periodEnd?: string;
+	featured?: boolean;
+	displayOrder?: number;
+}
+
+export interface UpdateImpactMetricRequest {
+	type?: MetricType;
+	value?: number;
+	unit?: MetricUnit;
+	description?: string;
+	entityType?: EntityType;
+	entityId?: string;
+	periodStart?: string;
+	periodEnd?: string;
+	featured?: boolean;
+	displayOrder?: number;
 }
 
 // ===== AIML Integrations Domain =====
@@ -157,11 +330,37 @@ export interface AimlIntegration {
 // ===== Reports Domain =====
 export interface Report {
 	id: string;
-	title: string;
-	type?: string;
-	content?: string;
-	createdAt?: string;
-	updatedAt?: string;
+	userId: string;
+	name: string;
+	description?: string;
+	sections?: Record<string, any>;
+	filters?: Record<string, any>;
+	isFavorite: boolean;
+	archivedAt?: string | null;
+	createdAt: string;
+	updatedAt: string;
+}
+
+export interface CreateReportRequest {
+	name: string;
+	description?: string;
+	sections?: Record<string, any>;
+	filters?: Record<string, any>;
+	favorite?: boolean;
+}
+
+export interface UpdateReportRequest {
+	name?: string;
+	description?: string;
+	sections?: Record<string, any>;
+	filters?: Record<string, any>;
+	favorite?: boolean;
+}
+
+export interface ReportSection {
+	name: string;
+	type: 'metrics' | 'timeline' | 'summary' | 'details';
+	config?: Record<string, any>;
 }
 
 // ===== Comments (Post Comments) =====
